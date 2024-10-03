@@ -1,0 +1,6 @@
+__pycache__
+Documents/NewlyUploaded/*
+Documents/AlreadyRead/*
+Documents/Results/*
+Data/*
+.env
