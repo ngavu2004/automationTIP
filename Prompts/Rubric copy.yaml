@@ -1,0 +1,63 @@
+ProcessMilestone:
+  criteria:
+    - name: "Does the value of the 'Project Name:' attribute exist in the file?"
+      grade_range: "0-2"
+    - name: "Does the value of the 'Clinic:' attribute exist in the file?"
+      grade_range: "0-2"
+    - name: "Does the value of the 'Process:' attribute exist in the file?"
+      grade_range: "0-2"
+    - name: "Does the value of the 'TIP 2.0 Process Milestone:' attribute exist in the file?"
+      grade_range: "0-2"
+    - name: "Does the value of the 'TIP 2.0 Process Milestone:' attribute include process milestone details?"
+      grade_range: "0-2"
+
+ProjectDescription:
+  criteria:
+    - name: "Does the value of the 'Project Description / Purpose' attribute include a brief description of the project?"
+      grade_range: "0-7"
+    - name: "Does the value of the 'Project Description / Purpose' attribute include detailed aims or purpose of the project?"
+      grade_range: "0-7"
+    - name: "Does the value of the 'Project Description / Purpose' attribute include detailed expected results from the project?"
+      grade_range: "0-6"
+
+ProjectOverview:
+  criteria:
+    - name: "Does the value of the 'Problem Summary:' attribute include a detailed and logical problem statement?"
+      grade_range: "0-9"
+    - name: "Does the value of the 'Desired Outcome(s):' attribute include a detailed and logical description?"
+      grade_range: "0-8"
+    - name: "Does the value of the 'Benefits:' attribute include a detailed and logical expected benefits?"
+      grade_range: "0-8"
+
+Timeline:
+  criteria:
+    - name: "Does the value of the each task list key tasks?"
+      grade_range: "0-10"
+    - name: "Does the value of the each task contain a specific planned completion due date?"
+      grade_range: "0-5"
+
+ProjectScope:
+  criteria:
+    - name: "Does the value of the 'In Scope Project Objectives' attribute include an aligned objectives with the project purpose?"
+      grade_range: "0-8"
+    - name: "Does the value of the 'Out of Scope Project Objectives or Activities' attribute include an aligned objectives with the project purpose?"
+      grade_range: "0-7"
+
+ProjectTeam:
+  criteria:
+    - name: "Does the value of the 'Team Lead:' attribute contain an individual's name?"
+      grade_range: "0-2"
+    - name: "Does the value of the 'Project Champion:' attribute contain an individual's name?"
+      grade_range: "0-2"
+    - name: "Does the value of the 'Process Owner:' attribute contain an individual's name?"
+      grade_range: "0-2"
+    - name: "Does the value of the 'Process Manager:' attribute contain an individual's name?"
+      grade_range: "0-2"
+    - name: "Does the value of the 'Stakeholders' stakeholder attribute contain an individual's name?"
+      grade_range: "0-2"
+    - name: "Does the 'Stakeholders' contain values for the attributes: stakeholder, title, department, and organization?"
+      grade_range: "0-2"
+    - name: "Does the value of the 'Project Team Members' Name attribute contain an individual's name?"
+      grade_range: "0-2"
+    - name: "Do the 'Project Team Members' contain role values for the 'Team role' attribute?"
+      grade_range: "0-1"

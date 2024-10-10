@@ -51,9 +51,16 @@ def read_pdf_text(pdfPath: str, is_rubric_path=False):
     return pdfText
 
 
+# Process the entire text (combining bullet point formatting and line break cleaning)
+def process_text(text):
+    text = format_bullet_points(text)  # Handle bullet points
+    text = clean_text_formatting(text)  # Clean up line breaks and extra spaces
+    return text
+
+
 # Bullet point handling and line break management
 def format_bullet_points(text):
-    special_bullets = ["●", "•", "■"]  # Bullet point symbols
+    special_bullets = ["●", "•", "■", "○", "◆"]  # Bullet point symbols
     formatted_lines = []
     in_bullet_section = False  # To track whether we are in a bullet point section
     current_bullet = None
@@ -62,7 +69,7 @@ def format_bullet_points(text):
     for line in text.split("\n"):
         stripped_line = line.strip()
 
-        # If a bullet point is found, add 3 spaces before the bullet point
+        # If a bullet point is found, add proper indentation
         if any(stripped_line.startswith(bullet) for bullet in special_bullets):
             if bullet_text_lines:
                 # Combine all lines of the current bullet point before starting a new one
@@ -85,40 +92,10 @@ def format_bullet_points(text):
     return "\n".join(formatted_lines)
 
 
-# 테이블 영역 감지를 위한 함수 (테이블을 특정 패턴으로 감싸기)
-def mark_table_sections(text):
-    # Camelot으로 추출된 테이블 구역을 표시하기 위해 테이블 시작과 끝에 태그를 추가
-    table_start_marker = "<TABLE_START>"
-    table_end_marker = "<TABLE_END>"
-
-    # 예제에서는 간단히 테이블의 시작과 끝을 구분하는 패턴을 추가
-    marked_text = f"{table_start_marker}\n{text.strip()}\n{table_end_marker}"
-    return marked_text
-
-
-# 줄바꿈 및 공백 정리
+# Clean up line breaks and extra spaces
 def clean_text_formatting(text):
-    # 테이블 섹션을 제외한 부분에서만 공백 제거 처리
-    def replace_spaces(match):
-        section = match.group(0)
-        if "<TABLE_START>" in section and "<TABLE_END>" in section:
-            # 테이블 구역에서는 공백을 유지
-            return section
-        else:
-            # 테이블 이외의 구역에서 공백을 하나로 줄이고 문장 끝에서 줄바꿈 추가
-            section = re.sub(r" +", " ", section)  # 과도한 공백을 한 칸으로 줄임
-            section = re.sub(r"(\.\s*)\n*", r"\1\n\n", section)  # 문장이 끝날 때마다 줄바꿈 추가
-            return section
-
-    # 테이블 섹션 포함된 텍스트에서 공백 처리
-    text = re.sub(r"(<TABLE_START>.*?<TABLE_END>)", replace_spaces, text, flags=re.DOTALL)
-    return text
-
-
-# Process the entire text (combining bullet point formatting and line break cleaning)
-def process_text(text):
-    text = format_bullet_points(text)  # Handle bullet points
-    text = clean_text_formatting(text)  # Clean up line breaks and extra spaces
+    # text = re.sub(r'(\w)\s+(\w)', r'\1 \2', text)
+    # text = re.sub(r'(\w)\s+(\w)', r'\1\2', text)
     return text
 
 
@@ -151,7 +128,7 @@ def extract_data(file_path):
                         # If it starts with a number, add exactly one space after the number
                         if any(sub_item.strip().startswith(str(i) + ".") for i in range(1, 10)):
                             formatted_sub_item = sub_item.strip().replace(".", ". ", 1)
-                            row_cells.append(formatted_sub_item)  # Do not use ljust
+                            row_cells.append(formatted_sub_item)
                         else:
                             row_cells.append(sub_item.ljust(max_col_widths[idx] + 2))
                 else:
@@ -171,7 +148,6 @@ def extract_data(file_path):
 
     # Apply bullet point formatting globally
     formatted_data = process_text(formatted_data)
-
     return formatted_data
 
 

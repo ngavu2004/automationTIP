@@ -60,9 +60,9 @@ def generate_grade():
     if st.button("Start grading"):
         with st.spinner("Grading documents..."):
             delete_files("Documents/NewlyUploaded")
-            if uploaded_file_original is not None and uploaded_file_rubric is not None:
+            if uploaded_file_original is not None:  # and uploaded_file_rubric is not None:
                 save_uploaded_file(uploaded_file_original, "Documents/NewlyUploaded")
-                save_uploaded_file(uploaded_file_rubric, "Documents/NewlyUploaded/Rubric")
+                # save_uploaded_file(uploaded_file_rubric, "Documents/NewlyUploaded/Rubric")
 
                 gnerated_grades = generate_grades()
                 st.session_state.output = gnerated_grades
@@ -72,8 +72,8 @@ def generate_grade():
                 delete_files("Documents/NewlyUploaded/Rubric")
             elif uploaded_file_original is None and uploaded_file_rubric is not None:
                 st.session_state.output = "Please upload a file to grade."
-            elif uploaded_file_original is not None and uploaded_file_rubric is None:
-                st.session_state.output = "Please upload a rubric file."
+            # elif uploaded_file_original is not None and uploaded_file_rubric is None:
+            #     st.session_state.output = "Please upload a rubric file."
 
     else:
         if 'output' not in st.session_state:

@@ -18,15 +18,15 @@ def generate_grades():
     check_directory()
 
     # Initialize the DataFrame to store results
-    gradesDataframe = pd.DataFrame(columns=["File Name", "Process Milestone", "Process Milestone Explanation",
-                                            "Project Description", "Project Description Explanation",
+    gradesDataframe = pd.DataFrame(columns=["File Name", "Project Description / Purpose",
+                                            "Project Description / Purpose Explanation",
                                             "Project Overview", "Project Overview Explanation",
                                             "Timeline", "Timeline Explanation",
                                             "Project Scope", "Project Scope Explanation",
                                             "Project Team", "Project Team Explanation",
                                             "Total Score", "Overall Description"])
 
-    # Take the file list of each folder    
+    # Take the file list of each folder
     fileNamesWithExtension = os.listdir("Documents/NewlyUploaded/")
     rubricFileNamesWithExtension = os.listdir("Documents/NewlyUploaded/Rubric/")
 
@@ -72,55 +72,76 @@ def generate_grades():
         else:
             continue
 
-        # Evaluate the document using LLM
-        extractedFeatures = evaluate_document(fileContent)
-        print("evaluate_document is called")
+    # Evaluate the document using LLM
+    extractedFeatures = evaluate_document(fileContent)
+    print("evaluate_document is called")
 
-        if not extractedFeatures:
-            print("No response from LLM.")
-            continue
+    if not extractedFeatures:
+        print("No response from LLM.")
+        # continue
 
-        # Extract JSON data from LLM's answer
-        json_start_index = extractedFeatures.find("{")
-        json_end_index = extractedFeatures.rfind("}") + 1
+    # Extract JSON data from LLM's answer
+    json_start_index = extractedFeatures.find("{")
+    json_end_index = extractedFeatures.rfind("}") + 1
 
-        if json_start_index == -1 or json_end_index == -1:
-            print("No valid JSON found in LLM response.")
-            continue
+    if json_start_index == -1 or json_end_index == -1:
+        print("No valid JSON found in LLM response.")
+        # continue
 
-        json_data = extractedFeatures[json_start_index:json_end_index]
+    json_data = extractedFeatures[json_start_index:json_end_index]
 
-        # Parse the JSON result from LLM
-        try:
-            json_results = json.loads(json_data)
-        except json.JSONDecodeError as e:
-            print(f"JSON decode error: {str(e)}")
-            continue
+    # Parse the JSON result from LLM
+    try:
+        json_results = json.loads(json_data)
+    except json.JSONDecodeError as e:
+        print(f"JSON decode error: {str(e)}")
+        # continue
 
-        # Append the result to the DataFrame
-        new_entry = pd.DataFrame([{
-            "File Name": fileName,
-            "Process Milestone": json_results["Process Milestone"]["score"],
-            "Process Milestone Explanation": json_results["Process Milestone"]["explanation"],
-            "Project Description": json_results["Project Description"]["score"],
-            "Project Description Explanation": json_results["Project Description"]["explanation"],
-            "Project Overview": json_results["Project Overview"]["score"],
-            "Project Overview Explanation": json_results["Project Overview"]["explanation"],
-            "Timeline": json_results["Timeline"]["score"],
-            "Timeline Explanation": json_results["Timeline"]["explanation"],
-            "Project Scope": json_results["Project Scope"]["score"],
-            "Project Scope Explanation": json_results["Project Scope"]["explanation"],
-            "Project Team": json_results["Project Team"]["score"],
-            "Project Team Explanation": json_results["Project Team"]["explanation"],
-            "Total Score": f'"{json_results["Total Score"]}"',
-            "Overall Description": json_results["Overall Description"]
-        }])
+    # # Append the result to the DataFrame
+    # new_entry = pd.DataFrame([{
+    #     "File Name": fileName,
+    #     "Project Description / Purpose": json_results["Project Description / Purpose"]["score"],
+    #     "Project Description / Purpose Explanation": json_results["Project Description / Purpose"]["explanation"],
+    #     "Project Overview": json_results["Project Overview"]["score"],
+    #     "Project Overview Explanation": json_results["Project Overview"]["explanation"],
+    #     "Timeline": json_results["Timeline"]["score"],
+    #     "Timeline Explanation": json_results["Timeline"]["explanation"],
+    #     "Project Scope": json_results["Project Scope"]["score"],
+    #     "Project Scope Explanation": json_results["Project Scope"]["explanation"],
+    #     "Project Team": json_results["Project Team"]["score"],
+    #     "Project Team Explanation": json_results["Project Team"]["explanation"],
+    #     "Total Score": json_results["Total Score"],
+    #     "Overall Description": json_results["Overall Description"]
+    # }])
 
-        gradesDataframe = pd.concat([gradesDataframe, new_entry], ignore_index=True)
+    # Append the result to the DataFrame, ensure json_results contains the keys
+    new_entry = pd.DataFrame([{
+        "File Name": fileName,
+        "Project Description / Purpose": json_results.get("Project Description / Purpose", {}).get("score", "") if json_results else "",
+        "Project Description / Purpose Explanation": json_results.get("Project Description / Purpose", {}).get("explanation", "") if json_results else "",
+        "Project Overview": json_results.get("Project Overview", {}).get("score", "") if json_results else "",
+        "Project Overview Explanation": json_results.get("Project Overview", {}).get("explanation", "") if json_results else "",
+        "Timeline": json_results.get("Timeline", {}).get("score", "") if json_results else "",
+        "Timeline Explanation": json_results.get("Timeline", {}).get("explanation", "") if json_results else "",
+        "Project Scope": json_results.get("Project Scope", {}).get("score", "") if json_results else "",
+        "Project Scope Explanation": json_results.get("Project Scope", {}).get("explanation", "") if json_results else "",
+        "Project Team": json_results.get("Project Team", {}).get("score", "") if json_results else "",
+        "Project Team Explanation": json_results.get("Project Team", {}).get("explanation", "") if json_results else "",
+        "Total Score": json_results.get("Total Score", "") if json_results else "",
+        "Overall Description": json_results.get("Overall Description", "") if json_results else ""
+    }])
+
+    # For debugging
+    if json_results:
+        print(f"json_results: {json_results}")
+    else:
+        print("json_results is None or not assigned.")
+
+    gradesDataframe = pd.concat([gradesDataframe, new_entry], ignore_index=True)
 
     csv_file_name = f"Documents/Results/{os.path.splitext(allFileNames)[0]}.csv"
     gradesDataframe.to_csv(csv_file_name, index=False, mode="w", header=True)
-    print("gradesDataframe is saved")
+    print("Grades csv file is generated")
 
     return gradesDataframe
 
