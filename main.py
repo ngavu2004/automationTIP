@@ -89,7 +89,7 @@ def generate_grades():
         # continue
 
     json_data = extractedFeatures[json_start_index:json_end_index]
-
+    json_results = {}
     # Parse the JSON result from LLM
     try:
         json_results = json.loads(json_data)

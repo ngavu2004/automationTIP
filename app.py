@@ -30,6 +30,7 @@ def generate_grade():
     col1, col2 = st.columns(2)
 
     with col1:
+        # upload multiple files
         uploaded_file_original = st.file_uploader("Upload a file to grade: ", type=["pdf", "docx"])
 
     with col2:
