@@ -6,7 +6,6 @@ from langchain.docstore.document import Document
 from langchain_community.chat_models import ChatOllama
 from langchain_community.callbacks import get_openai_callback
 from langchain.chains.question_answering import load_qa_chain
-# from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 
 output_dir = "chunk"
@@ -19,53 +18,6 @@ def load_rubric(filename: str):
     with open(filename, 'r') as file:
         rubric = yaml.safe_load(file)
     return rubric
-
-
-# Dynamically generate the prompt based on the loaded rubric
-def generate_prompt(rubric: dict, part_name: str):
-    if part_name not in rubric:
-        return f"No rubric found for {part_name}."
-
-    prompt = """
-    You are an evaluator. Below is a rubric for evaluating various parts of a project report. Please evaluate each part based on the specific criteria provided for each section.
-    """
-
-    for criterion in rubric[part_name]['criteria']:
-        prompt += f"- {criterion['name']} (Score Range: {criterion['grade_range']})\n"
-
-    prompt += f"""
-    Instructions:
-    1. Assign a score based on the criteria and provided grade range.
-    2. Provide a brief explanation if a section does not meet the criteria.
-    3. Please return the result in JSON format, including the score for each section.
-        - Here is the required format:
-        {{
-            "Project Description / Purpose": {{
-                "score": "" if part_name != "Project Description / Purpose" else " ",
-                "explanation": "" if part_name != "Project Description / Purpose" else " "
-            }},
-            "Project Overview": {{
-                "score": "" if part_name != "Project Overview" else " ",
-                "explanation": "" if part_name != "Project Overview" else " "
-            }},
-            "Timeline": {{
-                "score": "" if part_name != "Timeline" else " ",
-                "explanation": "" if part_name != "Timeline" else " "
-            }},
-            "Project Scope": {{
-                "score": "" if part_name != "Project Scope" else " ",
-                "explanation": "" if part_name != "Project Scope" else " "
-            }},
-            "Project Team": {{
-                "score": "" if part_name != "Project Team" else " ",
-                "explanation": "" if part_name != "Project Team" else " "
-            }},
-            "Total Score": "",
-            "Overall Description": ""
-        }}
-    4. When you return the result, please include the total score and overall description.
-    """
-    return prompt
 
 
 # Split the text by predefined parts (titles)
@@ -117,7 +69,80 @@ def split_text_by_parts(text: str, output_dir: str):
     return chunks
 
 
-# Evaluate each part
+# Dynamically generate the prompt based on the loaded rubric
+def generate_prompt(rubric: dict, part_name: str):
+    if part_name not in rubric:
+        return f"No rubric found for {part_name}."
+
+    prompt = """
+    You are an evaluator. Below is a rubric for evaluating various parts of a project report. Please evaluate each section based on the specific criteria provided for each section.
+    """
+
+    for criterion in rubric[part_name]['criteria']:
+        prompt += f"- {criterion['name']} (Score Range: {criterion['grade_range']})\n"
+
+    prompt += f"""
+    Instructions:
+    1. Assign a score based on the criteria and provided grade range.
+    2. For **each score assigned**, provide a **clear and detailed explanation** that justifies the score, including references to specific aspects of the project report that led to the score.
+        - If the score is low, explain what was missing or insufficient.
+        - If the score is high, explain what was well-done or exceeded expectations.
+        - Focus only on the evaluation of '{part_name}' as a whole.
+        - Do not create or refer to any sub-sections under '{part_name}'.
+    3. Ensure that **every question** under '{part_name}' is evaluated. Do not skip or omit any questions, even if the response is minimal.
+    4. The explanation should focus on **how well the report meets the criteria** outlined for that section.
+    5. The 'Total Score' should be the sum of all individual question scores, and 'Overall Description' should summarize the evaluation.
+    6. Ensure the JSON is well-formed, properly indented, and does not contain any syntax errors.
+        - Example format:
+            {{
+                "{part_name}": {{
+                    "Question 1": {{
+                        "score": "",
+                        "explanation": ""
+                    }},
+                    "Question 2": {{
+                        "score": "",
+                        "explanation": ""
+                    }},
+                    ...
+                    "Total Score": "",
+                    "Overall Description": ""
+                }}
+            }}
+    7. Respond only with the JSON object. Do not include any explanations outside the JSON.
+    """
+    return prompt
+
+
+# Extract and Parsing JSON part from LLM response
+def extract_and_parse_json(llm_response: str, part_name: str):
+    # Extract JSON part from LLM response
+    json_start_index = llm_response.find("{")
+    json_end_index = llm_response.rfind("}") + 1
+
+    if json_start_index == -1 or json_end_index == -1 or json_end_index <= json_start_index:
+        print(f"No valid JSON found in LLM response for {part_name}: {llm_response}")
+        return None
+
+    json_data = llm_response[json_start_index:json_end_index]
+
+    # Modifying incomplete JSON format
+    if json_data.count('{') != json_data.count('}'):
+        missing_brackets = json_data.count('{') - json_data.count('}')
+        json_data += '}' * missing_brackets
+
+    # Parsing JSON data
+    try:
+        result = yaml.safe_load(json_data)
+        print(f"Parsed JSON for {part_name}: \n {result}")
+        return result
+    except Exception as e:
+        print(f"Error parsing JSON for {part_name}: {e}")
+        print(f"Invalid JSON content: {json_data}")
+        return None
+
+
+# Evaluate each part of the document separately
 def evaluate_part(text: str, rubric: dict, part_name: str, chain):
     prompt = generate_prompt(rubric, part_name)  # Make prompt for each part
     document = Document(page_content=text)
@@ -127,31 +152,23 @@ def evaluate_part(text: str, rubric: dict, part_name: str, chain):
             answer = chain.run(input_documents=[document], question=prompt)
             print(f"LLM evaluation result for {part_name}: {answer}")
 
-            # Extract JSON part from LLM response
-            json_start_index = answer.find("{")
-            json_end_index = answer.rfind("}") + 1
-            if json_start_index == -1 or json_end_index == -1:
-                print(f"No valid JSON found in LLM response for {part_name}: {answer}")
+            result = extract_and_parse_json(answer, part_name)
+            if not result:
                 return None
 
-            json_data = answer[json_start_index:json_end_index]
+            # Extracting the correct section from the parsed JSON
+            part_result = result.get(part_name, {})  # Access the nested structure for the current part
 
-            # Parsing JSON data
-            try:
-                result = yaml.safe_load(json_data)
-                print(f"Parsed JSON for {part_name}: \n {result}")
-            except Exception as e:
-                print(f"Error parsing JSON for {part_name}: {e}")
-                print(f"Invalid JSON content: {json_data}")
-                return None
+            # Extract total score for each part
+            total_score = part_result.get("Total Score", "")
+            overall_description = part_result.get("Overall Description", "")
 
-            # Extract total score and overall description for each part
-            total_score = result.get("Total Score", "")
-            overall_description = result.get("Overall Description", "")
+            # Debugging
+            print(f"Result for {part_name}: Total Score: {total_score}, Overall Description: {overall_description}")
 
             return {
-                "score": total_score,
-                "explanation": overall_description
+                "Total Score": total_score,
+                "Overall Description": overall_description
             }
 
     except Exception as e:
@@ -159,35 +176,35 @@ def evaluate_part(text: str, rubric: dict, part_name: str, chain):
         return None
 
 
-# Dictionary for saving the evaluation results of each part
-evaluation_results = {
-    "Project Description / Purpose": {"score": "", "explanation": ""},
-    "Project Overview": {"score": "", "explanation": ""},
-    "Timeline": {"score": "", "explanation": ""},
-    "Project Scope": {"score": "", "explanation": ""},
-    "Project Team": {"score": "", "explanation": ""},
-    "Total Score": "",
-    "Overall Description": ""
-}
+# Process and aggregate results from different parts
+def process_results(results: dict):
+    aggregated_result = {
+        "Project Description / Purpose": {"Total Score": "", "Overall Description": ""},
+        "Project Overview": {"Total Score": "", "Overall Description": ""},
+        "Timeline": {"Total Score": "", "Overall Description": ""},
+        "Project Scope": {"Total Score": "", "Overall Description": ""},
+        "Project Team": {"Total Score": "", "Overall Description": ""},
+        "Document Total Score": ""
+    }
+
+    document_total_score = 0
+    for part_name, part_data in results.items():
+        part_score = part_data.get("Total Score", 0)
+        aggregated_result[part_name]["Total Score"] = part_score
+        aggregated_result[part_name]["Overall Description"] = part_data.get("Overall Description", "")
+
+        try:
+            document_total_score += int(part_score)
+        except ValueError:
+            pass
+
+    aggregated_result["Document Total Score"] = f"{document_total_score}"
+    return aggregated_result
 
 
-# Aggregating the total evaluation
-def aggregate_results():
-    total_score = 0
-    for part in evaluation_results:
-        if evaluation_results[part]["score"]:
-            try:
-                total_score += int(evaluation_results[part]["score"])  # Sum up scores
-            except ValueError:
-                pass
-    evaluation_results["Total Score"] = f"{total_score}/100"
-
-    return evaluation_results
-
-
-# Evaluate the document based on the predefined rubric
-def evaluate_document(text: str):
-    print("evaluate_document function is called")
+# Evaluate the document using the generated prompt for all sections
+def evaluate_document_with_prompt(text: str):
+    print("evaluate_document_with_prompt function is called")
 
     # Load rubric from YAML file
     rubric_file = os.path.join("Prompts", "rubric.yaml")
@@ -201,19 +218,20 @@ def evaluate_document(text: str):
         print("LLM is initialized and running")
         chain = load_qa_chain(llm=llm)
 
-        # Process each part individually using the generated prompt
-        with get_openai_callback() as callback:
-            for part_name, part_text in parts.items():
-                print(f"Evaluating part: {part_name}")
-                part_result = evaluate_part(part_text, rubric, part_name, chain)
-                if part_result:
-                    evaluation_results[part_name] = part_result
+        # Store results for each part
+        results = {}
+        for part_name, part_text in parts.items():
+            print(f"Evaluating part: {part_name}")
+            part_result = evaluate_part(part_text, rubric, part_name, chain)
+            if part_result:
+                results[part_name] = part_result
 
-        final_result = aggregate_results()
+        # Process and aggregate results
+        final_results = process_results(results)
 
-        return final_result
+        return final_results
 
     except Exception as e:
-        print("Exception in LLM evaluation: " + str(e))
+        print(f"Exception in LLM evaluation: {e}")
 
     return "Unexpected error"
