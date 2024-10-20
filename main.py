@@ -82,37 +82,7 @@ def generate_grades():
 
     json_results = extractedFeatures
 
-    if json_start_index == -1 or json_end_index == -1:
-        print("No valid JSON found in LLM response.")
-        # continue
-
-    json_data = extractedFeatures[json_start_index:json_end_index]
-    json_results = {}
-    # Parse the JSON result from LLM
-    try:
-        json_results = json.loads(json_data)
-    except json.JSONDecodeError as e:
-        print(f"JSON decode error: {str(e)}")
-        # continue
-
-    # # Append the result to the DataFrame
-    # new_entry = pd.DataFrame([{
-    #     "File Name": fileName,
-    #     "Project Description / Purpose": json_results["Project Description / Purpose"]["score"],
-    #     "Project Description / Purpose Explanation": json_results["Project Description / Purpose"]["explanation"],
-    #     "Project Overview": json_results["Project Overview"]["score"],
-    #     "Project Overview Explanation": json_results["Project Overview"]["explanation"],
-    #     "Timeline": json_results["Timeline"]["score"],
-    #     "Timeline Explanation": json_results["Timeline"]["explanation"],
-    #     "Project Scope": json_results["Project Scope"]["score"],
-    #     "Project Scope Explanation": json_results["Project Scope"]["explanation"],
-    #     "Project Team": json_results["Project Team"]["score"],
-    #     "Project Team Explanation": json_results["Project Team"]["explanation"],
-    #     "Total Score": json_results["Total Score"],
-    #     "Overall Description": json_results["Overall Description"]
-    # }])
-
-    # Append the result to the DataFrame, ensure json_results contains the keys
+    # Append the result to the DataFrame
     new_entry = pd.DataFrame([{
         "File Name": fileNameWithExtension,
         "Project Description / Purpose Total Score": json_results.get("Project Description / Purpose", {}).get("Total Score"),
