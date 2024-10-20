@@ -1,6 +1,7 @@
 import os
 import json
 import pandas as pd
+import csv   # Added to write the result to a csv file
 from dotenv import load_dotenv
 from Helper.logging import langsmith
 from file_processing import check_directory, read_pdf_text, convert_docx_to_pdf
@@ -84,7 +85,7 @@ def generate_grades():
 
     # Append the result to the DataFrame
     new_entry = pd.DataFrame([{
-        "File Name": fileNameWithExtension,
+        "File Name": os.path.splitext(allFileNames)[0],
         "Project Description / Purpose Total Score": json_results.get("Project Description / Purpose", {}).get("Total Score"),
         "Project Description / Purpose Overall Description": json_results.get("Project Description / Purpose", {}).get("Overall Description"),
         "Project Overview Total Score": json_results.get("Project Overview", {}).get("Total Score"),
@@ -105,6 +106,11 @@ def generate_grades():
 
     csv_file_name = f"Documents/Results/{os.path.splitext(allFileNames)[0]}.csv"
     gradesDataframe.to_csv(csv_file_name, index=False, mode="w", header=True)
+
+    # add result to the result file
+    with open(r"Documents/Results/result.csv", "a") as result_file:
+        writer = csv.writer(result_file)
+        writer.writerow(new_entry.iloc[0].to_list())
     print("Grades csv file is generated")
 
     return gradesDataframe
