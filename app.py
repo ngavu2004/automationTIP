@@ -14,6 +14,7 @@ def save_uploaded_file(uploaded_file, path):
     file_path = os.path.join(save_path, uploaded_file.name)
     with open(file_path, "wb") as f:
         f.write(uploaded_file.getbuffer())
+    return file_path
 
 
 def delete_files(path):
@@ -25,7 +26,7 @@ def delete_files(path):
     except Exception as e:
         pass
 
-
+# Accept multiple file uploading
 def generate_grade():
     col1, col2 = st.columns(2)
 
@@ -58,15 +59,23 @@ def generate_grade():
         """,
         unsafe_allow_html=True
     )
+
     if st.button("Start grading"):
         with st.spinner("Grading documents..."):
             delete_files("Documents/NewlyUploaded")
-            if uploaded_file_original is not None:  # and uploaded_file_rubric is not None:
-                save_uploaded_file(uploaded_file_original, "Documents/NewlyUploaded")
-                # save_uploaded_file(uploaded_file_rubric, "Documents/NewlyUploaded/Rubric")
+            output_results = []
 
-                gnerated_grades = generate_grades()
-                st.session_state.output = gnerated_grades
+            if uploaded_file_original is not None:  # and uploaded_file_rubric is not None:
+                for uploaded_file in uploaded_file_original:
+                    save_uploaded_file(uploaded_file, "Documents/NewlyUploaded")
+                    st.write(f"Processing file: {uploaded_file.name}")
+                    # st.spinner(f"Processing file: {uploaded_file.name}")
+                    # save_uploaded_file(uploaded_file_rubric, "Documents/NewlyUploaded/Rubric")
+
+                    generated_grades = generate_grades()
+                    output_results.append(f"Results for {uploaded_file.name}: \n{generated_grades}")
+
+                # st.session_state.output = generated_grades
 
                 st.success("Grading completed!!!")
                 delete_files("Documents/NewlyUploaded")

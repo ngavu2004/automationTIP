@@ -6,4 +6,4 @@ Data/*
 .env
 georgelab/
 reference
-chunk/
+chunk

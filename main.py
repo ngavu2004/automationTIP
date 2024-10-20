@@ -4,7 +4,7 @@ import pandas as pd
 from dotenv import load_dotenv
 from Helper.logging import langsmith
 from file_processing import check_directory, read_pdf_text, convert_docx_to_pdf
-from llm_processing import evaluate_document
+from llm_processing import evaluate_document_with_prompt
 
 # Load environment settings
 load_dotenv()
@@ -18,13 +18,13 @@ def generate_grades():
     check_directory()
 
     # Initialize the DataFrame to store results
-    gradesDataframe = pd.DataFrame(columns=["File Name", "Project Description / Purpose",
-                                            "Project Description / Purpose Explanation",
-                                            "Project Overview", "Project Overview Explanation",
-                                            "Timeline", "Timeline Explanation",
-                                            "Project Scope", "Project Scope Explanation",
-                                            "Project Team", "Project Team Explanation",
-                                            "Total Score", "Overall Description"])
+    gradesDataframe = pd.DataFrame(columns=["File Name", "Project Description / Purpose Total Score",
+                                            "Project Description / Purpose Overall Description",
+                                            "Project Overview Total Score", "Project Overview Overall Description",
+                                            "Timeline Total Score", "Timeline Overall Description",
+                                            "Project Scope Total Score", "Project Scope Overall Description",
+                                            "Project Team Total Score", "Project Team Overall Description",
+                                            "Document Total Score"])
 
     # Take the file list of each folder
     fileNamesWithExtension = os.listdir("Documents/NewlyUploaded/")
@@ -34,7 +34,7 @@ def generate_grades():
     for fileNameWithExtension in fileNamesWithExtension:
         allFileNames += fileNameWithExtension
         # Extract file extension to differentiate between PDF and DOCX
-        fileName, extension = os.path.splitext(fileNameWithExtension)
+        target_fileName, extension = os.path.splitext(fileNameWithExtension)
         extension = extension.lower()  # Normalize the extension to lowercase
 
         # Read PDF content
@@ -54,7 +54,7 @@ def generate_grades():
 
     # Process rubric documents
     for rubricFileNameWithExtension in rubricFileNamesWithExtension:
-        fileName, extension = os.path.splitext(rubricFileNameWithExtension)
+        rubric_fileName, extension = os.path.splitext(rubricFileNameWithExtension)
         extension = extension.lower()
 
         # Read PDF content
@@ -73,16 +73,14 @@ def generate_grades():
             continue
 
     # Evaluate the document using LLM
-    extractedFeatures = evaluate_document(fileContent)
+    extractedFeatures = evaluate_document_with_prompt(fileContent)
     print("evaluate_document is called")
 
     if not extractedFeatures:
         print("No response from LLM.")
-        # continue
+        return
 
-    # Extract JSON data from LLM's answer
-    json_start_index = extractedFeatures.find("{")
-    json_end_index = extractedFeatures.rfind("}") + 1
+    json_results = extractedFeatures
 
     if json_start_index == -1 or json_end_index == -1:
         print("No valid JSON found in LLM response.")
@@ -116,26 +114,22 @@ def generate_grades():
 
     # Append the result to the DataFrame, ensure json_results contains the keys
     new_entry = pd.DataFrame([{
-        "File Name": fileName,
-        "Project Description / Purpose": json_results.get("Project Description / Purpose", {}).get("score", "") if json_results else "",
-        "Project Description / Purpose Explanation": json_results.get("Project Description / Purpose", {}).get("explanation", "") if json_results else "",
-        "Project Overview": json_results.get("Project Overview", {}).get("score", "") if json_results else "",
-        "Project Overview Explanation": json_results.get("Project Overview", {}).get("explanation", "") if json_results else "",
-        "Timeline": json_results.get("Timeline", {}).get("score", "") if json_results else "",
-        "Timeline Explanation": json_results.get("Timeline", {}).get("explanation", "") if json_results else "",
-        "Project Scope": json_results.get("Project Scope", {}).get("score", "") if json_results else "",
-        "Project Scope Explanation": json_results.get("Project Scope", {}).get("explanation", "") if json_results else "",
-        "Project Team": json_results.get("Project Team", {}).get("score", "") if json_results else "",
-        "Project Team Explanation": json_results.get("Project Team", {}).get("explanation", "") if json_results else "",
-        "Total Score": json_results.get("Total Score", "") if json_results else "",
-        "Overall Description": json_results.get("Overall Description", "") if json_results else ""
+        "File Name": fileNameWithExtension,
+        "Project Description / Purpose Total Score": json_results.get("Project Description / Purpose", {}).get("Total Score"),
+        "Project Description / Purpose Overall Description": json_results.get("Project Description / Purpose", {}).get("Overall Description"),
+        "Project Overview Total Score": json_results.get("Project Overview", {}).get("Total Score"),
+        "Project Overview Overall Description": json_results.get("Project Overview", {}).get("Overall Description"),
+        "Timeline Total Score": json_results.get("Timeline", {}).get("Total Score"),
+        "Timeline Overall Description": json_results.get("Timeline", {}).get("Overall Description"),
+        "Project Scope Total Score": json_results.get("Project Scope", {}).get("Total Score"),
+        "Project Scope Overall Description": json_results.get("Project Scope", {}).get("Overall Description"),
+        "Project Team Total Score": json_results.get("Project Team", {}).get("Total Score"),
+        "Project Team Overall Description": json_results.get("Project Team", {}).get("Overall Description"),
+        "Document Total Score": json_results.get("Document Total Score")
     }])
 
-    # For debugging
-    if json_results:
-        print(f"json_results: {json_results}")
-    else:
-        print("json_results is None or not assigned.")
+    # For debugging, print the new_entry before adding it to DataFrame
+    print(f"new_entry: \n {new_entry}")
 
     gradesDataframe = pd.concat([gradesDataframe, new_entry], ignore_index=True)
 
