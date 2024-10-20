@@ -31,8 +31,7 @@ def generate_grade():
     col1, col2 = st.columns(2)
 
     with col1:
-        # upload multiple files
-        uploaded_file_original = st.file_uploader("Upload a file to grade: ", type=["pdf", "docx"])
+        uploaded_file_original = st.file_uploader("Upload a file to grade: ", type=["pdf", "docx"], accept_multiple_files=True)
 
     with col2:
         uploaded_file_rubric = st.file_uploader("Upload a rubric file: ", type=["pdf", "docx"])
