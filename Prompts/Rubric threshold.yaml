@@ -16,7 +16,7 @@ Project Description / Purpose:
       grade_range: "0-5"
     - name: "Question 8. Does the value of the 'Project Description / Purpose' attribute include detailed expected results from the project?"
       grade_range: "0-5"
-  threshold: 11
+  
 Project Overview:
   criteria:
     - name: "Question 1. Does the value of the 'Problem Summary:' attribute include a detailed (at least 1 sentence) and logical problem statement?"
@@ -25,21 +25,21 @@ Project Overview:
       grade_range: "0-8"
     - name: "Question 3. Does the value of the 'Benefits:' attribute include a detailed (at least 1 sentence) explicitly talking about the benefits of this project?"
       grade_range: "0-8"
-  threshold: 10
+
 Timeline:
   criteria:
     - name: "Question 1. Does the task list contain a comprehensive set of key tasks? (Evaluate all tasks together)"
       grade_range: "0-10"
     - name: "Question 2. Does the task list contain specific planned completion due dates for each task? (Evaluate all tasks together)"
       grade_range: "0-10"
-  threshold: 8
+
 Project Scope:
   criteria:
     - name: "Question 1. Does the value of the 'In Scope Project Objectives' attribute include an aligned objectives with the project purpose?"
       grade_range: "0-8"
     - name: "Question 2. Does the value of the 'Out of Scope Project Objectives or Activities' attribute include an aligned objectives with the project purpose?"
       grade_range: "0-7"
-  threshold: 6
+
 Project Team:
   criteria:
     - name: "Question 1. Does the value of the 'Team Lead:' attribute contain an individual's name?"
@@ -58,4 +58,3 @@ Project Team:
       grade_range: "0-2"
     - name: "Question 8. Do the 'Project Team Members' contain role values for the 'Team role' attribute?"
       grade_range: "0-1"
-  threshold: 8
