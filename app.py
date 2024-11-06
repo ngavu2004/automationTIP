@@ -1,8 +1,8 @@
 import os
 import pandas as pd
 import streamlit as st
-import matplotlib.pyplot as plt
-import matplotlib.colors as mcolors
+# import matplotlib.pyplot as plt
+# import matplotlib.colors as mcolors
 
 from main import generate_grades
 # from VisualizeGrades import
@@ -26,15 +26,17 @@ def delete_files(path):
     except Exception as e:
         pass
 
+
 # Accept multiple file uploading
 def generate_grade():
-    col1, col2 = st.columns(2)
+    uploaded_file_original = st.file_uploader("Upload a file to grade: ", type=["pdf", "docx"], accept_multiple_files=True)
+    # col1, col2 = st.columns(2)
 
-    with col1:
-        uploaded_file_original = st.file_uploader("Upload a file to grade: ", type=["pdf", "docx"], accept_multiple_files=True)
+    # with col1:
+    #     uploaded_file_original = st.file_uploader("Upload a file to grade: ", type=["pdf", "docx"], accept_multiple_files=True)
 
-    with col2:
-        uploaded_file_rubric = st.file_uploader("Upload a rubric file: ", type=["pdf", "docx"])
+    # with col2:
+    #     uploaded_file_rubric = st.file_uploader("Upload a rubric file: ", type=["pdf", "docx"])
 
     st.markdown("<p style='margin-top: 30px; margin-bottom: 1px;'></p>", unsafe_allow_html=True)
     textarea_style = """
@@ -87,16 +89,6 @@ def generate_grade():
     else:
         if 'output' not in st.session_state:
             st.session_state.output = "You'll see the output here"
-
-    st.markdown("")
-    st.markdown(
-        f"""
-            <div style="border: 10px solid #e6e6e6; padding: 30px; border-radius: 5px;">
-                {st.session_state.output}
-            </div>
-        """,
-        unsafe_allow_html=True
-    )
 
 
 def main():

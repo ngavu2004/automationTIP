@@ -81,6 +81,38 @@ def generate_prompt(rubric: dict, part_name: str):
     for criterion in rubric[part_name]['criteria']:
         prompt += f"- {criterion['name']} (Score Range: {criterion['grade_range']})\n"
 
+    # prompt += f"""
+    # Instructions:
+    # 1. Assign a score based on the criteria and provided grade range.
+    # 2. For **each score assigned**, provide a **clear and detailed explanation** that justifies the score, including references to specific aspects of the project report that led to the score.
+    #     - If the score is low, explain what was missing or insufficient.
+    #     - If the score is high, explain what was well-done or exceeded expectations.
+    #     - Focus only on the evaluation of '{part_name}' as a whole.
+    #     - Do not create or refer to any sub-sections under '{part_name}'.
+    # 3. Ensure that **every question** under '{part_name}' is evaluated. Do not skip or omit any questions, even if the response is minimal.
+    # 4. The explanation should focus on **how well the report meets the criteria** outlined for that section.
+    # 5. The 'Total Score' should be the sum of all individual question scores, and 'Overall Description' should summarize the evaluation.
+    # 6. Ensure the JSON is well-formed, properly indented, and does not contain any syntax errors.
+    #     - Example format:
+    #         {{
+    #             "{part_name}": {{
+    #                 "Question 1": {{
+    #                     "score": "",
+    #                     "explanation": ""
+    #                 }},
+    #                 "Question 2": {{
+    #                     "score": "",
+    #                     "explanation": ""
+    #                 }},
+    #                 ...
+    #                 "Total Score": "",
+    #                 "Overall Description": ""
+    #             }}
+    #         }}
+    # 7. Respond only with the JSON object. Do not include any explanations outside the JSON.
+    # """
+    # return prompt
+
     prompt += f"""
     Instructions:
     1. Assign a score based on the criteria and provided grade range.
@@ -90,26 +122,17 @@ def generate_prompt(rubric: dict, part_name: str):
         - Focus only on the evaluation of '{part_name}' as a whole.
         - Do not create or refer to any sub-sections under '{part_name}'.
     3. Ensure that **every question** under '{part_name}' is evaluated. Do not skip or omit any questions, even if the response is minimal.
-    4. The explanation should focus on **how well the report meets the criteria** outlined for that section.
-    5. The 'Total Score' should be the sum of all individual question scores, and 'Overall Description' should summarize the evaluation.
-    6. Ensure the JSON is well-formed, properly indented, and does not contain any syntax errors.
+    4. The explanation should focus on **how well the report meets the criteria** outlined for that section.    
+    5. Ensure the JSON is well-formed, properly indented, and does not contain any syntax errors.
         - Example format:
             {{
                 "{part_name}": {{
-                    "Question 1": {{
-                        "score": "",
-                        "explanation": ""
-                    }},
-                    "Question 2": {{
-                        "score": "",
-                        "explanation": ""
-                    }},
+                    "Question 1": {{"score": "", "explanation": ""}},
+                    "Question 2": {{"score": "", "explanation": ""}},
                     ...
-                    "Total Score": "",
-                    "Overall Description": ""
                 }}
             }}
-    7. Respond only with the JSON object. Do not include any explanations outside the JSON.
+    6. Respond only with the JSON object. Do not include any explanations outside the JSON.
     """
     return prompt
 
@@ -134,7 +157,7 @@ def extract_and_parse_json(llm_response: str, part_name: str):
     # Parsing JSON data
     try:
         result = yaml.safe_load(json_data)
-        print(f"Parsed JSON for {part_name}: \n {result}")
+        # print(f"Parsed JSON for {part_name}: \n {result}")
         return result
     except Exception as e:
         print(f"Error parsing JSON for {part_name}: {e}")
@@ -156,20 +179,29 @@ def evaluate_part(text: str, rubric: dict, part_name: str, chain):
             if not result:
                 return None
 
-            # Extracting the correct section from the parsed JSON
-            part_result = result.get(part_name, {})  # Access the nested structure for the current part
+            part_result = {}
+            for criterion, criterion_data in result.get(part_name, {}).items():
+                part_result[criterion] = {
+                    "score": criterion_data.get("score", ""),
+                    "explanation": criterion_data.get("explanation", "")
+                }
 
-            # Extract total score for each part
-            total_score = part_result.get("Total Score", "")
-            overall_description = part_result.get("Overall Description", "")
+            return part_result
 
-            # Debugging
-            print(f"Result for {part_name}: Total Score: {total_score}, Overall Description: {overall_description}")
+            # # Extracting the correct section from the parsed JSON
+            # part_result = result.get(part_name, {})  # Access the nested structure for the current part
 
-            return {
-                "Total Score": total_score,
-                "Overall Description": overall_description
-            }
+            # # Extract total score for each part
+            # total_score = part_result.get("Total Score", "")
+            # overall_description = part_result.get("Overall Description", "")
+
+            # # Debugging
+            # print(f"Result for {part_name}: Total Score: {total_score}, Overall Description: {overall_description}")
+
+            # return {
+            #     "Total Score": total_score,
+            #     "Overall Description": overall_description
+            # }
 
     except Exception as e:
         print(f"Error running LLM for {part_name}: {e}")
@@ -178,33 +210,38 @@ def evaluate_part(text: str, rubric: dict, part_name: str, chain):
 
 # Process and aggregate results from different parts
 def process_results(results: dict):
-    aggregated_result = {
-        "Project Description / Purpose": {"Total Score": "", "Overall Description": ""},
-        "Project Overview": {"Total Score": "", "Overall Description": ""},
-        "Timeline": {"Total Score": "", "Overall Description": ""},
-        "Project Scope": {"Total Score": "", "Overall Description": ""},
-        "Project Team": {"Total Score": "", "Overall Description": ""},
-        "Document Total Score": ""
-    }
-
-    document_total_score = 0
+    aggregated_result = {}
     for part_name, part_data in results.items():
-        part_score = part_data.get("Total Score", 0)
-        aggregated_result[part_name]["Total Score"] = part_score
-        aggregated_result[part_name]["Overall Description"] = part_data.get("Overall Description", "")
-
-        try:
-            document_total_score += int(part_score)
-        except ValueError:
-            pass
-
-    aggregated_result["Document Total Score"] = f"{document_total_score}"
+        aggregated_result[part_name] = part_data
     return aggregated_result
+
+    # aggregated_result = {
+    #     "Project Description / Purpose": {"Total Score": "", "Overall Description": ""},
+    #     "Project Overview": {"Total Score": "", "Overall Description": ""},
+    #     "Timeline": {"Total Score": "", "Overall Description": ""},
+    #     "Project Scope": {"Total Score": "", "Overall Description": ""},
+    #     "Project Team": {"Total Score": "", "Overall Description": ""},
+    #     "Document Total Score": ""
+    # }
+
+    # document_total_score = 0
+    # for part_name, part_data in results.items():
+    #     part_score = part_data.get("Total Score", 0)
+    #     aggregated_result[part_name]["Total Score"] = part_score
+    #     aggregated_result[part_name]["Overall Description"] = part_data.get("Overall Description", "")
+
+    #     try:
+    #         document_total_score += int(part_score)
+    #     except ValueError:
+    #         pass
+
+    # aggregated_result["Document Total Score"] = f"{document_total_score}"
+    # return aggregated_result
 
 
 # Evaluate the document using the generated prompt for all sections
 def evaluate_document_with_prompt(text: str):
-    print("evaluate_document_with_prompt function is called")
+    # print("evaluate_document_with_prompt function is called")
 
     # Load rubric from YAML file
     rubric_file = os.path.join("Prompts", "rubric.yaml")

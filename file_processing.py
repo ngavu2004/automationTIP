@@ -9,12 +9,12 @@ import pythoncom
 def check_directory():
     if not os.path.exists("Documents/NewlyUploaded"):
         os.makedirs("Documents/NewlyUploaded")
-    if not os.path.exists("Documents/NewlyUploaded/Rubric"):
-        os.makedirs("Documents/NewlyUploaded/Rubric")
+    # if not os.path.exists("Documents/NewlyUploaded/Rubric"):
+    #     os.makedirs("Documents/NewlyUploaded/Rubric")
     if not os.path.exists("Documents/AlreadyRead"):
         os.makedirs("Documents/AlreadyRead")
-    if not os.path.exists("Documents/AlreadyRead/Rubric"):
-        os.makedirs("Documents/AlreadyRead/Rubric")
+    # if not os.path.exists("Documents/AlreadyRead/Rubric"):
+    #     os.makedirs("Documents/AlreadyRead/Rubric")
     if not os.path.exists("Documents/Results"):
         os.makedirs("Documents/Results")
 
