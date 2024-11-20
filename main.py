@@ -15,17 +15,6 @@ def generate_grades():
 
     check_directory()
 
-    # Initialize the DataFrame to store results
-    # gradesDataframe = pd.DataFrame(columns=["File Name", "Project Description / Purpose Total Score",
-    #                                         "Project Description / Purpose Overall Description",
-    #                                         "Project Overview Total Score", "Project Overview Overall Description",
-    #                                         "Timeline Total Score", "Timeline Overall Description",
-    #                                         "Project Scope Total Score", "Project Scope Overall Description",
-    #                                         "Project Team Total Score", "Project Team Overall Description",
-    #                                         "Document Total Score"])
-
-    gradesDataframe = pd.DataFrame(columns=["", "File_Name", "AI_Grade", "Comment", "Section", "Criteria"])
-
     # # Take the file list of each folder
     # fileNamesWithExtension = os.listdir("Documents/NewlyUploaded/")
     # rubricFileNamesWithExtension = os.listdir("Documents/NewlyUploaded/Rubric/")
@@ -37,14 +26,22 @@ def generate_grades():
     # Take the file list of each folder
     fileNamesWithExtension = os.listdir("Documents/NewlyUploaded/")
 
-    # Initialize an index counter for criteria
-    idx = 0
+    # Initialize a set to track processed files
+    processed_files = set()
 
     # Process documents to be graded
     for fileNameWithExtension in fileNamesWithExtension:
+        # print(f"[DEBUG] Processing file: {fileNameWithExtension}")
+        if fileNameWithExtension in processed_files:
+            # print(f"[DEBUG] Skipping already processed file: {fileNameWithExtension}")
+            continue
+
         # Extract file extension to differentiate between PDF and DOCX
         target_fileName, extension = os.path.splitext(fileNameWithExtension)
         extension = extension.lower()  # Normalize the extension to lowercase
+
+        # Initialize a DataFrame for each file
+        gradesDataframe = pd.DataFrame(columns=["", "File_Name", "AI_Grade", "Comment", "Section", "Criteria"])
 
         # Read PDF content
         if extension == ".pdf":
@@ -53,7 +50,7 @@ def generate_grades():
 
         # Read DOCX content
         elif extension == ".docx":
-            print("Processing DOCX file:", fileNameWithExtension)
+            print("Processing docx file:", fileNameWithExtension)
             docxPath = "Documents/NewlyUploaded/" + fileNameWithExtension
             fileContent = convert_docx_to_pdf(docxPath)
 
@@ -81,55 +78,46 @@ def generate_grades():
     #     else:
     #         continue
 
-    # Evaluate the document using LLM
-    json_results = evaluate_document_with_prompt(fileContent)
+        # Validate file content before LLM evaluation
+        if not fileContent:
+            print(f"[ERROR] File content is empty for {fileNameWithExtension}. Skipping.")
+            continue
 
-    if not json_results:
-        print("No response from LLM.")
-        return
+        # Evaluate the document using LLM
+        print(f"Calling evaluate_document_with_prompt for {fileNameWithExtension}...")
+        try:
+            json_results = evaluate_document_with_prompt(fileContent)
 
-    # Append the result to the DataFrame
-    # new_entry = pd.DataFrame([{
-    #     "File Name": fileNameWithExtension,
-    #     "Project Description / Purpose Total Score": json_results.get("Project Description / Purpose", {}).get("Total Score"),
-    #     "Project Description / Purpose Overall Description": json_results.get("Project Description / Purpose", {}).get("Overall Description"),
-    #     "Project Overview Total Score": json_results.get("Project Overview", {}).get("Total Score"),
-    #     "Project Overview Overall Description": json_results.get("Project Overview", {}).get("Overall Description"),
-    #     "Timeline Total Score": json_results.get("Timeline", {}).get("Total Score"),
-    #     "Timeline Overall Description": json_results.get("Timeline", {}).get("Overall Description"),
-    #     "Project Scope Total Score": json_results.get("Project Scope", {}).get("Total Score"),
-    #     "Project Scope Overall Description": json_results.get("Project Scope", {}).get("Overall Description"),
-    #     "Project Team Total Score": json_results.get("Project Team", {}).get("Total Score"),
-    #     "Project Team Overall Description": json_results.get("Project Team", {}).get("Overall Description"),
-    #     "Document Total Score": json_results.get("Document Total Score")
-    # }])
+            if not json_results:
+                print("[ERROR] No response from LLM for {fileNameWithExtension}.")
+                return
+        except Exception as e:
+            print(f"[ERROR] Exception during LLM evaluation for {fileNameWithExtension}: {e}")
+            continue
 
-    # Append the result to the DataFrame
-    for part_name, part_data in json_results.items():
-        criteria_list = rubric.get(part_name, {}).get("criteria", [])
+        # Append the result to the DataFrame
+        idx = 0
+        for part_name, part_data in json_results.items():
+            criteria_list = rubric.get(part_name, {}).get("criteria", [])
 
-        for criteria_data, criterion in zip(part_data.values(), criteria_list):
-            idx += 1
-            new_entry = {
-                "": idx,
-                "File_Name": target_fileName,
-                "AI_Grade": criteria_data.get("score", ""),
-                "Comment": criteria_data.get("explanation", ""),
-                "Section": part_name,
-                "Criteria": criterion["name"]
-            }
-            gradesDataframe = pd.concat([gradesDataframe, pd.DataFrame([new_entry])], ignore_index=True)
+            for criteria_data, criterion in zip(part_data.values(), criteria_list):
+                idx += 1
+                new_entry = {
+                    "": idx,
+                    "File_Name": target_fileName,
+                    "AI_Grade": criteria_data.get("score", ""),
+                    "Comment": criteria_data.get("explanation", ""),
+                    "Section": part_name,
+                    "Criteria": criterion["name"]
+                }
+                gradesDataframe = pd.concat([gradesDataframe, pd.DataFrame([new_entry])], ignore_index=True)
 
-    # # For debugging, print the new_entry before adding it to DataFrame
-    # print(f"new_entry: \n {new_entry}")
+        csv_file_name = "Documents/Results/Result.csv"
+        gradesDataframe.to_csv(csv_file_name, index=False, mode="a", header=not os.path.exists(csv_file_name))
+        print(f"Grades for {fileNameWithExtension} have been added to CSV.")
 
-    # gradesDataframe = pd.concat([gradesDataframe, new_entry], ignore_index=True)
-
-    csv_file_name = "Documents/Results/Result.csv"
-    gradesDataframe.to_csv(csv_file_name, index=False, mode="a", header=not os.path.exists(csv_file_name))
-    print("Grades CSV file is updated")
-
-    return gradesDataframe
+        # Mark the file as processed
+        processed_files.add(fileNameWithExtension)
 
 
 if __name__ == "__main__":
