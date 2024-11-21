@@ -1,20 +1,23 @@
 import re
 import os
 import camelot
-from docx2pdf import convert
 import pythoncom
+from docx2pdf import convert
+
+# Can be changed according to the input files (List of keywards need to be the header of the chunk)
+line_break_keywords = ["Project Overview", "Timeline", "Project Scope", "Project Team", "Signatures"]
 
 
 # Ensure directories exist
 def check_directory():
     if not os.path.exists("Documents/NewlyUploaded"):
         os.makedirs("Documents/NewlyUploaded")
-    if not os.path.exists("Documents/NewlyUploaded/Rubric"):
-        os.makedirs("Documents/NewlyUploaded/Rubric")
+    # if not os.path.exists("Documents/NewlyUploaded/Rubric"):
+    #     os.makedirs("Documents/NewlyUploaded/Rubric")
     if not os.path.exists("Documents/AlreadyRead"):
         os.makedirs("Documents/AlreadyRead")
-    if not os.path.exists("Documents/AlreadyRead/Rubric"):
-        os.makedirs("Documents/AlreadyRead/Rubric")
+    # if not os.path.exists("Documents/AlreadyRead/Rubric"):
+    #     os.makedirs("Documents/AlreadyRead/Rubric")
     if not os.path.exists("Documents/Results"):
         os.makedirs("Documents/Results")
 
@@ -26,10 +29,11 @@ def read_pdf_text(pdfPath: str, is_rubric_path=False):
     pdfText = ""
     path = os.path.split(pdfPath)
     tail = path[1]
-    fileName, extension = tail.split(".")
+    fileName, extension = tail.rsplit(".", 1)
 
     # Set the appropriate output directory
-    output_folder = "Documents/AlreadyRead/Rubric" if is_rubric_path else "Documents/AlreadyRead"
+    # output_folder = "Documents/AlreadyRead/Rubric" if is_rubric_path else "Documents/AlreadyRead"
+    output_folder = "Documents/AlreadyRead"
 
     # When never processed the PDF content before
     if not os.path.exists(f"{output_folder}/{fileName}.txt"):
@@ -51,20 +55,19 @@ def read_pdf_text(pdfPath: str, is_rubric_path=False):
     return pdfText
 
 
-# Process the entire text (combining bullet point formatting and line break cleaning)
+# Process the entire text with bullet point formatting
 def process_text(text):
-    text = format_bullet_points(text)  # Handle bullet points
-    text = clean_text_formatting(text)  # Clean up line breaks and extra spaces
+    text = format_bullet_points(text)   # Handle bullet points
     return text
 
 
 # Bullet point handling and line break management
 def format_bullet_points(text):
-    special_bullets = ["●", "•", "■", "○", "◆"]  # Bullet point symbols
+    special_bullets = ["●", "•", "■", "○", "◆", "-"]  # Bullet point symbols
     formatted_lines = []
+    bullet_text_lines = []  # To store bullet point lines
     in_bullet_section = False  # To track whether we are in a bullet point section
     current_bullet = None
-    bullet_text_lines = []  # To store bullet point lines
 
     for line in text.split("\n"):
         stripped_line = line.strip()
@@ -75,32 +78,24 @@ def format_bullet_points(text):
                 # Combine all lines of the current bullet point before starting a new one
                 formatted_lines.append(f"   {current_bullet} {' '.join(bullet_text_lines)}")
                 bullet_text_lines = []
+
             current_bullet = next(b for b in special_bullets if stripped_line.startswith(b))
-            bullet_text = stripped_line[len(current_bullet):].strip()  # Remove bullet from the line
+            bullet_text = stripped_line[len(current_bullet):].strip()   # Remove bullet from the line
             bullet_text_lines.append(re.sub(r"\s+", " ", bullet_text))  # Normalize spaces
             in_bullet_section = True
         else:
             if in_bullet_section:
-                bullet_text_lines.append(stripped_line)  # Append lines belonging to the current bullet
-            else:
-                formatted_lines.append(line)
+                # Append lines belonging to the current bullet and reset for non-bullet lines
+                formatted_lines.append(f"   {current_bullet} {' '.join(bullet_text_lines)}")
+                bullet_text_lines = []
+                in_bullet_section = False
+            formatted_lines.append(line)
 
     if bullet_text_lines:
         # Append the last bullet point when finished
         formatted_lines.append(f"   {current_bullet} {' '.join(bullet_text_lines)}")
 
     return "\n".join(formatted_lines)
-
-
-# Clean up line breaks and extra spaces
-def clean_text_formatting(text):
-    # text = re.sub(r'(\w)\s+(\w)', r'\1 \2', text)
-    # text = re.sub(r'(\w)\s+(\w)', r'\1\2', text)
-    return text
-
-
-# Needs to be improved
-line_break_keywords = ["Project Overview", "Timeline", "Project Scope", "Project Team", "Signatures"]
 
 
 # Extract and format table data using Camelot
@@ -156,8 +151,9 @@ def convert_docx_to_pdf(docxPath: str, is_rubric_path=False):
     print(f"convert_docx_to_pdf is called for: {docxPath}")
     pdfPath = docxPath.replace(".docx", ".pdf")
 
-    # Save the PDF to a specific local path (adjust for rubric)
-    local_pdf_path = os.path.join("Documents/NewlyUploaded/Rubric", os.path.basename(pdfPath)) if is_rubric_path else os.path.join("Documents/NewlyUploaded", os.path.basename(pdfPath))
+    # Save the PDF to a specific local path
+    # local_pdf_path = os.path.join("Documents/NewlyUploaded/Rubric", os.path.basename(pdfPath)) if is_rubric_path else os.path.join("Documents/NewlyUploaded", os.path.basename(pdfPath))
+    local_pdf_path = os.path.join("Documents/NewlyUploaded", os.path.basename(pdfPath))
 
     try:
         # Initialize COM for docx2pdf
@@ -170,7 +166,8 @@ def convert_docx_to_pdf(docxPath: str, is_rubric_path=False):
         fileName = os.path.basename(docxPath).replace(".docx", "")
 
         # Set the appropriate output directory
-        output_folder = "Documents/AlreadyRead/Rubric" if is_rubric_path else "Documents/AlreadyRead"
+        # output_folder = "Documents/AlreadyRead/Rubric" if is_rubric_path else "Documents/AlreadyRead"
+        output_folder = "Documents/AlreadyRead"
 
         # Check if the corresponding txt file already exists
         if not os.path.exists(f"{output_folder}/{fileName}.txt"):
@@ -189,7 +186,7 @@ def convert_docx_to_pdf(docxPath: str, is_rubric_path=False):
         return pdfText
 
     except Exception as e:
-        print(f"An error occurred while converting the file: {e}")
+        print(f"[ERROR] An error occurred while converting the file: {e}")
         return None  # Return None if an error occurs
 
     finally:
