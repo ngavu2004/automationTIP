@@ -1,5 +1,6 @@
 import os
 import yaml
+from string import Template
 from dotenv import load_dotenv
 from Helper.logging import langsmith
 from langchain.docstore.document import Document
@@ -82,37 +83,52 @@ def split_text_by_parts(text: str, output_dir: str):
 
 # Dynamically generate the prompt based on the loaded rubric
 def generate_prompt(rubric: dict, part_name: str):
-    if part_name not in rubric:
+
+    common_prompt = rubric.get("common_prompt", {})
+    introduction = common_prompt.get("introduction", "")
+    instructions = common_prompt.get("instructions", "")
+
+    sections = rubric.get("sections", {})
+    if part_name not in sections:
         return f"No rubric found for {part_name}."
 
-    prompt = """
-    You are an evaluator. Below is a rubric for evaluating various parts of a project report. Please evaluate based on the specific criteria provided.
-    """
+    section = sections[part_name]
+    criteria = section.get("criteria", [])
 
-    for criterion in rubric[part_name]['criteria']:
-        prompt += f"- {criterion['name']} (Score Range: {criterion['grade_range']})\n"
+    criteria_list = "\n".join(
+        f"- {criterion['name']} (Score Range: {criterion['grade_range']})"
+        for criterion in criteria
+    )
 
-    prompt += f"""
+    # Configure prompt_template
+    prompt_template = Template("""
+    $introduction
+
+    Criteria:
+    $criteria_list
+
     Instructions:
-    1. Assign a score based on the criteria and provided grade range.
-    2. For **each score assigned**, provide a **clear and detailed explanation** that justifies the score, including references to specific aspects of the project report that led to the score.
-        - If the score is low, explain what was missing or insufficient.
-        - If the score is high, explain what was well-done or exceeded expectations.
-        - Focus only on the evaluation of '{part_name}' as a whole.
-        - Do not create or refer to any sub-sections under '{part_name}'.
-    3. Ensure that **every question** under '{part_name}' is evaluated. Do not skip or omit any questions, even if the response is minimal.
-    4. The explanation should focus on **how well the report meets the criteria** outlined for that section.
-    5. Ensure the JSON is well-formed, properly indented, and does not contain any syntax errors.
-        - Example format:
-            {{
-                "{part_name}": {{
-                    "Question 1": {{"score": "", "explanation": ""}},
-                    "Question 2": {{"score": "", "explanation": ""}},
-                    ...
-                }}
-            }}
-    6. Respond only with the JSON object. Do not include any explanations outside the JSON.
-    """
+    $instructions
+
+    Example JSON Format:
+    {
+        "$part_name": {
+            "Question 1": {"score": "", "explanation": ""},
+            "Question 2": {"score": "", "explanation": ""},
+            ...
+        }
+    }
+
+    Respond only with the JSON object. The JSON object must use '$part_name' as the key for the section. Do not modify or replace '$part_name'.
+    """)
+
+    prompt = prompt_template.substitute(
+        introduction=introduction,
+        criteria_list=criteria_list,
+        instructions=instructions,
+        part_name=part_name
+    )
+
     return prompt
 
 
@@ -184,10 +200,9 @@ def process_results(results: dict):
 
 # Evaluate the document using the generated prompt for all sections
 def evaluate_document_with_prompt(text: str):
-    # print("evaluate_document_with_prompt function is called")
 
     # Load rubric from YAML file
-    rubric_file = os.path.join("Prompts", "rubric.yaml")
+    rubric_file = os.path.join("Prompts", "Rubric_template.yaml")  # Change rubric.yaml file as you want
     rubric = load_rubric(rubric_file)
 
     # Split the text into parts based on the titles
