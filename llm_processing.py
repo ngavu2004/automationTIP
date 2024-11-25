@@ -134,6 +134,7 @@ def generate_prompt(rubric: dict, part_name: str):
 
 # Extract and Parsing JSON part from LLM response
 def extract_and_parse_json(llm_response: str, part_name: str):
+    
     # Extract JSON part from LLM response
     json_start_index = llm_response.find("{")
     json_end_index = llm_response.rfind("}") + 1
@@ -208,6 +209,7 @@ def evaluate_document_with_prompt(text: str):
     # Split the text into parts based on the titles
     # print("Splitting text into parts...")  # Debugging
     parts = split_text_by_parts(text, output_dir)
+    print("parts: \n", parts)
     if not parts:
         # print("[ERROR] Text splitting failed or no parts found.")
         return None  # Return early if splitting fails
@@ -233,7 +235,7 @@ def evaluate_document_with_prompt(text: str):
                 processed_parts.add(part_name)
             else:
                 print(f"[WARNING] No result for part: {part_name}")
-
+        print("Final results:", results)
         if results:
             final_results = process_results(results)
             return final_results

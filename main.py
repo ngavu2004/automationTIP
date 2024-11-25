@@ -21,7 +21,7 @@ def generate_grades():
     # rubricFileNamesWithExtension = os.listdir("Documents/NewlyUploaded/Rubric/")
 
     # Load the rubric from YAML
-    rubric_file = "Prompts/rubric.yaml"
+    rubric_file = "Prompts/Rubric_template.yaml"
     rubric = load_rubric(rubric_file)
 
     # Take the file list of each folder
@@ -95,13 +95,17 @@ def generate_grades():
         except Exception as e:
             print(f"[ERROR] Exception during LLM evaluation for {fileNameWithExtension}: {e}")
             continue
-
+        
+        print("json_results: \n", json_results)
         # Append the result to the DataFrame
         idx = 0
         for part_name, part_data in json_results.items():
-            criteria_list = rubric.get(part_name, {}).get("criteria", [])
-
+            print("part_name: \n", part_name)
+            print("part_data: \n", part_data)
+            criteria_list = rubric.get("sections").get(part_name, {}).get("criteria", [])
+            print("criteria_list: \n", criteria_list)
             for criteria_data, criterion in zip(part_data.values(), criteria_list):
+                print("criteria_data: \n", criteria_data)
                 idx += 1
                 new_entry = {
                     "": idx,
@@ -111,9 +115,11 @@ def generate_grades():
                     "Section": part_name,
                     "Criteria": criterion["name"]
                 }
+                print("new_entry: \n", new_entry)
                 gradesDataframe = pd.concat([gradesDataframe, pd.DataFrame([new_entry])], ignore_index=True)
 
         csv_file_name = "Documents/Results/Result.csv"
+        print("gradesDataframe: \n", gradesDataframe)
         gradesDataframe.to_csv(csv_file_name, index=False, mode="a", header=not os.path.exists(csv_file_name))
         print(f"Grades for {fileNameWithExtension} have been added to CSV.")
 

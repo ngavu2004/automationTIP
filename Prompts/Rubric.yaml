@@ -1,4 +1,4 @@
-Project Description / Purpose:
+Project Description:
   criteria:
     - name: "Question 1. Does the value of the 'Project Name:' attribute exist in the file?"
       grade_range: "0-2"
@@ -10,11 +10,11 @@ Project Description / Purpose:
       grade_range: "0-2"
     - name: "Question 5. Does the value of the 'TIP 2.0 Process Milestone:' attribute provide specific process milestone details?"
       grade_range: "0-2"
-    - name: "Question 6. Does the value of the 'Project Description / Purpose' attribute include a brief description of the project?"
+    - name: "Question 6. Does the value of the 'Project Description' attribute include a brief description of the project?"
       grade_range: "0-5"
-    - name: "Question 7. Does the value of the 'Project Description / Purpose' attribute include a sentence that explicitly state the aims or purpose of the project?"
+    - name: "Question 7. Does the value of the 'Project Description' attribute include a sentence that explicitly state the aims or purpose of the project?"
       grade_range: "0-5"
-    - name: "Question 8. Does the value of the 'Project Description / Purpose' attribute include detailed expected results from the project?"
+    - name: "Question 8. Does the value of the 'Project Description' attribute include detailed expected results from the project?"
       grade_range: "0-5"
   threshold: 11
 Project Overview:
