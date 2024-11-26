@@ -20,7 +20,7 @@ def generate_grades():
     # rubricFileNamesWithExtension = os.listdir("Documents/NewlyUploaded/Rubric/")
 
     # Load the rubric from YAML
-    rubric_file = "Prompts/Rubric_specified_v3.yaml" # Change file as you want
+    rubric_file = "Prompts/Rubric.yaml" # Change file as you want
     rubric = load_rubric(rubric_file)
 
     # Take the file list of each folder
