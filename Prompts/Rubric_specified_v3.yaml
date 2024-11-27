@@ -1,0 +1,97 @@
+common_prompt:
+  introduction: |
+    You are an evaluator. Below is a rubric to evaluate a given input text based on the criteria.
+  instructions: |
+    1. Assign a binary score of either 0 or 1 for each question based on the grade range.
+    2. Provide a brief explanation for the score.
+        - If the score is 0, explain what was missing or insufficient.
+        - If the score is 1, explain what was well-done.
+    3. Ensure that **all questions** are explicitly answered. Do not skip or omit any questions, even if the response is minimal.
+
+sections:
+  Project Description / Purpose:
+    criteria:
+      - name: "Question 1. Is there a valid value for 'Project Name:' in the input?"
+        grade_range: "0-1"
+      - name: "Question 2. Is there a valid value for 'Clinic:' in the input?"
+        grade_range: "0-1"
+      - name: "Question 3. Is there a valid value for 'Process:' in the input?"
+        grade_range: "0-1"
+      - name: "Question 4. Is there a valid value for 'TIP 2.0 Process Milestone:' in the input?"
+        grade_range: "0-1"
+        pass examples:
+          - "Milestone 1.5 Health Equity"
+          - "5D: Identify health inequities"
+        fail examples:
+          - "'Milestone 1.5' (too vague)"
+          - "'Health Equity' (lacks details)"
+          - "'Identify Health Inequities and Health-related social needs' (lacks milestone)"
+      - name: "Question 5. Is there a specific value for 'TIP 2.0 Process Milestone:' that details the project milestone?"
+        grade_range: "0-1"
+        pass examples:
+          - "Milestone 1.5 Health Equity"
+          - "5D: Identify health inequities"
+        fail examples:
+          - "'Milestone 1.5' (too vague)"
+          - "'Health Equity' (lacks details)"
+          - "'Identify Health Inequities and Health-related social needs' (lacks milestone)"
+      - name: "Question 6. Is there a valid value for 'Project Description / Purpose' that includes a brief description of the project?"
+        grade_range: "0-1"
+        pass examples:
+          - "Screening clients for Health-Related Social Needs using an evidenced based screening tool on an annual basis is needed to better understand and act on EMPACT-SPC’s clients Social Determinants of Health."
+        fail examples:
+          - "This new referral process will help us create better communication between the patients and ensure they are receiving proper care (more details needed)"
+      - name: "Question 7. Is there a valid value for 'Project Description / Purpose' that includes a sentence explicitly stating the purpose of the project?"
+        grade_range: "0-1"
+        pass examples:
+          - "The purpose of the HRSN screening is to implement a standard patient-provider communication protocol for those in need of community resources."
+        fail examples:
+          - "This new referral process will help us create better communication between the patients and ensure they are receiving proper care (lacks purpose)"
+      - name: "Question 8. Is there a valid value for 'Project Description / Purpose' that includes detailed expected results from the project?"
+        grade_range: "0-1"
+        pass examples:
+          - "The HRNS screening tool helps healthcare providers identify and discuss the non-medical needs of the patients and families that received medical and/or behavioral health care."
+        fail examples:
+          - "Improve mental health outcomes for new caregivers through early detection and intervention (lacks detailed expected results)"
+
+  Project Overview:
+    criteria:
+      - name: "Question 1. Is there a valid value provided after the 'Problem Summary:' attribute that includes a detailed (at least 1 sentence) and logical problem statement?"
+        grade_range: "0-1"
+      - name: "Question 2. Is there a valid value provided after the 'Desired Outcome(s):' attribute that includes at least 1 sentence explicitly describing the expected results or desired outcomes?"
+        grade_range: "0-1"
+      - name: "Question 3. Is there a valid value provided after the 'Benefits:' attribute that includes a detailed (at least 1 sentence) explanation explicitly describing the benefits of this project?"
+        grade_range: "0-1"
+
+  Timeline:
+    criteria:
+      - name: "Question 1. Is there a valid value provided for the task list that contains a comprehensive set of key tasks? (Evaluate all tasks together)"
+        grade_range: "0-1"
+      - name: "Question 2. Is there a valid value provided for the task list that contains specific planned completion due dates for each task? (Evaluate all tasks together)"
+        grade_range: "0-1"
+
+  Project Scope:
+    criteria:
+      - name: "Question 1. Is there a valid value provided after the 'In Scope Project Objectives' attribute that includes objectives aligned with the project purpose?"
+        grade_range: "0-1"
+      - name: "Question 2. Is there a valid value provided after the 'Out of Scope Project Objectives or Activities' attribute that includes objectives aligned with the project purpose?"
+        grade_range: "0-1"
+
+  Project Team:
+    criteria:
+      - name: "Question 1. Is there a valid value provided after the 'Team Lead:' attribute that contains an individual's name? (Do not grade the generic title's presence)"
+        grade_range: "0-1"
+      - name: "Question 2. Is there a valid value provided after the 'Project Champion:' attribute that contains an individual's name? (Do not grade the generic title's presence)"
+        grade_range: "0-1"
+      - name: "Question 3. Is there a valid value provided after the 'Process Owner:' attribute that contains an individual's name? (Do not grade the generic title's presence)"
+        grade_range: "0-1"
+      - name: "Question 4. Is there a valid value provided after the 'Process Manager:' attribute that contains an individual's name? (Do not grade the generic title's presence)"
+        grade_range: "0-1"
+      - name: "Question 5. Is there a valid value provided after the 'Stakeholders' stakeholder attribute that contains an individual's name? (Do not grade the attribute name's presence)"
+        grade_range: "0-1"
+      - name: "Question 6. Is there a valid value provided after the 'Stakeholders' Stakeholder, Title, Department, and Organization attribute that contains valid values? (Do not grade the attribute name's presence)"
+        grade_range: "0-1"
+      - name: "Question 7. Is there a valid value provided after the 'Project Team Members' Name attribute that contains an individual's name? (Do not grade the attribute name's presence)"
+        grade_range: "0-1"
+      - name: "Question 8. Is there a valid value provided for the 'Project Team Members' that contains values for the 'Team role' attribute? (Do not grade the attribute name's presence)"
+        grade_range: "0-1"

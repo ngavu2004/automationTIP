@@ -10,6 +10,13 @@ from llm_processing import evaluate_document_with_prompt, load_rubric
 load_dotenv()
 
 
+# Load and dynamically extract all sections from the rubric
+def extract_all_sections_from_rubric(rubric):
+    sections = rubric.get("sections", {})
+    section_names = list(sections.keys())  # Dynamically extract section names
+    return sections, section_names
+
+
 # Main function to process PDF files and store the evaluation result
 def generate_grades():
     print("generate_grades function is called")
@@ -21,8 +28,14 @@ def generate_grades():
     # rubricFileNamesWithExtension = os.listdir("Documents/NewlyUploaded/Rubric/")
 
     # Load the rubric from YAML
-    rubric_file = "Prompts/Rubric_template.yaml"
+    rubric_file = "Prompts/Rubric_specified_v3.yaml" # Change file as you want
     rubric = load_rubric(rubric_file)
+
+    # Dynamically extract all sections
+    rubric_sections = extract_all_sections_from_rubric(rubric)
+    if not rubric_sections:
+        print("[ERROR] No valid sections found in the rubric.")
+        return
 
     # Take the file list of each folder
     fileNamesWithExtension = os.listdir("Documents/NewlyUploaded/")
@@ -100,10 +113,9 @@ def generate_grades():
         # Append the result to the DataFrame
         idx = 0
         for part_name, part_data in json_results.items():
-            print("part_name: \n", part_name)
-            print("part_data: \n", part_data)
-            criteria_list = rubric.get("sections").get(part_name, {}).get("criteria", [])
-            print("criteria_list: \n", criteria_list)
+            # criteria_list = rubric.get(part_name, {}).get("criteria", [])
+            criteria_list = rubric_sections.get(part_name, {}).get("criteria", [])
+
             for criteria_data, criterion in zip(part_data.values(), criteria_list):
                 print("criteria_data: \n", criteria_data)
                 idx += 1
