@@ -155,6 +155,7 @@ def generate_prompt(rubric: dict, part_name: str, input_text: str):
 
 # Extract and Parsing JSON part from LLM response
 def extract_and_parse_json(llm_response: str, part_name: str):
+    
     # Extract JSON part from LLM response
     json_start_index = llm_response.find("{")
     json_end_index = llm_response.rfind("}") + 1
@@ -277,7 +278,6 @@ def evaluate_document_with_prompt(text: str):
             part_result = evaluate_part(part_text, rubric, part_name, chain)
             if part_result:
                 results[part_name] = part_result
-
         if results:
             return results
         else:
