@@ -11,22 +11,13 @@ common_prompt:
 sections:
   Project Description / Purpose:
     criteria:
-      - name: "Question 1. Is there a valid value for 'Project Name:' in the input?"
+      - name: "Question 1. Is the Project name exist and enough to describe the project?"
         grade_range: "0-1"
-      - name: "Question 2. Is there a valid value for 'Clinic:' in the input?"
+      - name: "Question 2. Is the Clinic name exist and tell the clinic names?"
         grade_range: "0-1"
-      - name: "Question 3. Is there a valid value for 'Process:' in the input?"
+      - name: "Question 3. Is the Process name exist and tell the process names?"
         grade_range: "0-1"
-      - name: "Question 4. Is there a valid value for 'TIP 2.0 Process Milestone:' in the input?"
-        grade_range: "0-1"
-        pass examples:
-          - "Milestone 1.5 Health Equity"
-          - "5D: Identify health inequities"
-        fail examples:
-          - "'Milestone 1.5' (too vague)"
-          - "'Health Equity' (lacks details)"
-          - "'Identify Health Inequities and Health-related social needs' (lacks milestone)"
-      - name: "Question 5. Is there a specific value for 'TIP 2.0 Process Milestone:' that details the project milestone?"
+      - name: "Question 4. Is the TIP 2.0 Milestone exist and tell the milestone?"
         grade_range: "0-1"
         pass examples:
           - "Milestone 1.5 Health Equity"
@@ -35,24 +26,33 @@ sections:
           - "'Milestone 1.5' (too vague)"
           - "'Health Equity' (lacks details)"
           - "'Identify Health Inequities and Health-related social needs' (lacks milestone)"
-      - name: "Question 6. Is there a valid value for 'Project Description / Purpose' that includes a brief description of the project?"
+      - name: "Question 5. Is TIP 2.0 milestone details the project milestone?"
+        grade_range: "0-1"
+        pass examples:
+          - "Milestone 1.5 Health Equity"
+          - "5D: Identify health inequities"
+        fail examples:
+          - "'Milestone 1.5' (too vague)"
+          - "'Health Equity' (lacks details)"
+          - "'Identify Health Inequities and Health-related social needs' (lacks milestone)"
+      - name: "Question 6. Is the project description /purpose includes a brief description of the project?"
         grade_range: "0-1"
         pass examples:
           - "Screening clients for Health-Related Social Needs using an evidenced based screening tool on an annual basis is needed to better understand and act on EMPACT-SPC’s clients Social Determinants of Health."
         fail examples:
           - "This new referral process will help us create better communication between the patients and ensure they are receiving proper care (more details needed)"
-      - name: "Question 7. Is there a valid value for 'Project Description / Purpose' that includes a sentence explicitly stating the purpose of the project?"
+      - name: "Question 7. Is the project description /purpose includes a sentence explicitly stating the purpose of the project that starts with phrases like 'The purpose of this project is to implement a ...'?"
         grade_range: "0-1"
         pass examples:
           - "The purpose of the HRSN screening is to implement a standard patient-provider communication protocol for those in need of community resources."
         fail examples:
           - "This new referral process will help us create better communication between the patients and ensure they are receiving proper care (lacks purpose)"
-      - name: "Question 8. Is there a valid value for 'Project Description / Purpose' that includes detailed expected results from the project?"
+      - name: "Question 8. Is the project description /purpose includes expected results from the project?"
         grade_range: "0-1"
         pass examples:
           - "The HRNS screening tool helps healthcare providers identify and discuss the non-medical needs of the patients and families that received medical and/or behavioral health care."
         fail examples:
-          - "Improve mental health outcomes for new caregivers through early detection and intervention (lacks detailed expected results)"
+          - "(doesn't provide any expected results)"
 
   Project Overview:
     criteria:
