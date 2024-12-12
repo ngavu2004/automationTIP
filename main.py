@@ -28,7 +28,7 @@ def generate_grades():
     # rubricFileNamesWithExtension = os.listdir("Documents/NewlyUploaded/Rubric/")
 
     # Load the rubric from YAML
-    rubric_file = "Prompts/Rubric_specified_v3.yaml" # Change file as you want
+    rubric_file = "Prompts/Rubric Description result.yaml" # Change file as you want
     rubric = load_rubric(rubric_file)
 
     # Dynamically extract all sections
@@ -116,7 +116,8 @@ def generate_grades():
             # criteria_list = rubric.get(part_name, {}).get("criteria", [])
             criteria_list = rubric_sections.get(part_name, {}).get("criteria", [])
 
-            for criteria_data, criterion in zip(part_data.values(), criteria_list):
+            for criteria_data, criterion in zip(part_data.values(), part_data.keys()):
+                print("criteria_key: \n", criterion)
                 print("criteria_data: \n", criteria_data)
                 idx += 1
                 new_entry = {
@@ -125,7 +126,7 @@ def generate_grades():
                     "AI_Grade": criteria_data.get("score", ""),
                     "Comment": criteria_data.get("explanation", ""),
                     "Section": part_name,
-                    "Criteria": criterion["name"]
+                    "Criteria": criterion
                 }
                 print("new_entry: \n", new_entry)
                 gradesDataframe = pd.concat([gradesDataframe, pd.DataFrame([new_entry])], ignore_index=True)

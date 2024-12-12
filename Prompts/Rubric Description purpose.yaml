@@ -1,0 +1,31 @@
+common_prompt:
+  question:
+    Question 7 - Does it include explicit purpose of the project?
+  introduction: |
+    You are an automated project grader for the given project proposal. You are given a project description, and you should provide a score as binary value for the given description by following process and example.
+  instructions: |
+    Process 1: Read given project proposal’s project description part.
+    Process 2: Determine if the project includes a clear and explicit purpose statement (e.g., phrases like "The purpose of this project is..." or "This project is to...").
+    Process 3: If it includes the project purpose clearly, assign a score of 1.
+    If the purpose is vague or not explicitly stated, assign a score of 0.
+    Process 4:  Provide the detail reasons of the score assignment.
+
+sections:
+  Project Description / Purpose:
+    criteria:
+      example1:
+        input: "Screening clients for Health-Related Social Needs (HRSN) using an evidenced based screening tool on an annual basis is needed to better understand and act on EMPACT-SPC's clients Social Determinants of Health (SDOH).  EMPACT-SPC does not currently utilize a HRSN on a consistent basis.  The purpose of this project is to increase the percentage of completed PRAPARE screenings to at least 85% of clients seen by EMPACT-SPC between October 1, 2024, and March 31, 2025."
+        score: "1"
+        explanation: "Explicit purpose found: 'The purpose of this project is to increase the percentage of completed PRAPARE screenings to at least 85% of clients seen by EMPACT-SPC between October 1, 2024, and March 31, 2025."
+      example2:
+        input: "The purpose of this project is to train staff on the purpose of the Health Leads Social Needs Screening, ensure accurate screening of clients and families, assignment a corresponding Z and G code, and provide internal or external resources to our clients. Currently we are screening 100% of clients that receive a clinical intake, but less than 5% show a Yes on Health Leads Social Needs Screening. From our internal audits, we show 94% of adults having a Z code on their assessment. We're hoping through this project to see an increase to 50% of clinical intakes to show a Yes on the Health Leads Social Needs Screening."
+        score: "1"
+        explanation: "Explicit purpose found: 'The purpose of this project is to train staff on the purpose of the Health Leads Social Needs Screening, ensure accurate screening of clients and families.'"
+      example3:
+        input: "Screening members for health-related social needs has been recognized as a critical step for identifying needs of the members and allow us to build community networks to address such needs. Once member needs have been identified The Guidance Center begins the closed loop process of referrals, both inter-agency as well as our community partners to assist in meeting the social needs of our members"
+        score: "0"
+        explanation: "No explicit purpose statement found. Activities are mentioned, but the goal is not defined."
+      example4:
+        input: "Addressing social and economic needs for our members and families to fulfill their needs and maintain their health and well-being."
+        score: "0"
+        explanation: "I do not see enough detail about the project purpose statement."

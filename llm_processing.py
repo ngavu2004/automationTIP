@@ -87,69 +87,58 @@ def generate_prompt(rubric: dict, part_name: str, input_text: str):
     common_prompt = rubric.get("common_prompt", {})
     introduction = common_prompt.get("introduction", "")
     instructions = common_prompt.get("instructions", "")
-
+    question = common_prompt.get("question", "")
     sections = rubric.get("sections", {})
     if part_name not in sections:
         return f"No rubric found for {part_name}."
 
     section = sections[part_name]
-    criteria = section.get("criteria", [])
+    examples_section = section.get("criteria", [])
+    example_list = list(examples_section.keys())
+    print("Example list: ", example_list)
+    # Build the prompt with corresponding examples
+    examples = []
+    for example_num in example_list:
+        example = examples_section[example_num]
+        print("Example: ", example)
+        # Add examples
+        examples_text = f"""Input: "{example['input']}"\nOutput:\n{{score: {example['score']},\nExplanation:{example['explanation']}}}\n"""
+        examples.append(examples_text)
 
-    # Build the prompt with questions and corresponding examples
-    criteria_with_examples = []
-    for criterion in criteria:
-        # Add the question and its grade range
-        question_text = f"- {criterion['name']} (Score Range: {criterion['grade_range']})"
-
-        # Add examples for the criterion
-        pass_examples = criterion.get("pass examples", [])
-        fail_examples = criterion.get("fail examples", [])
-        examples_text = ""
-
-        for example in pass_examples:
-            examples_text += f"  Example Pass: {example}\n"
-        for example in fail_examples:
-            examples_text += f"  Example Fail: {example}\n"
-
-        # Combine the question and examples
-        criteria_with_examples.append(f"{question_text}\n{examples_text}")
-
-    # Combine all criteria with examples into a single text
-    criteria_list = "\n".join(criteria_with_examples)
-
+    examples = "\n".join(examples)
+    print("Examples: ", examples)
     # Configure prompt_template
     prompt_template = Template(f"""
     {introduction}
 
-    Instructions:
     {instructions}
 
-    Criteria with Examples:
-    {criteria_list}
-
-    Evaluate the following input:
-    {input_text}
-
-    Example JSON Format:
+    Return the result in the following JSON format::
     {{
         "{part_name}": {{
-            "Question 1": {{"score": "", "explanation": ""}},
-            "Question 2": {{"score": "", "explanation": ""}},
-            ...
+            "{question}": {{"score": "", "explanation": ""}},
         }}
     }}
+    Do not include any double quotes except for the keys and values in the JSON object.
+    Respond only with the JSON object. The JSON object must use '{part_name}' as the key for the section. Do not modify or replace '{part_name}'.
 
-    Respond only with the JSON object. The JSON object must use '{part_name}' as the key for the section. Do not modify or replace '{part_name}'. 
+    Examples:
+    {examples}
+
+    Evaluate the following input based on the criteria provided:
+    {input_text}
+     
     """)
 
     prompt = prompt_template.substitute(
         introduction=introduction,
-        criteria_list=criteria_list,
         instructions=instructions,
+        question=question,
         part_name=part_name,
-        input_text=input_text
+        input_text=input_text,
+        examples=examples
     )
-
+    print(f"Generated prompt for {part_name}:\n{prompt}")
     return prompt
 
 
@@ -225,7 +214,7 @@ def process_results(results: dict):
 def evaluate_document_with_prompt(text: str):
 
     # Load rubric from YAML file
-    rubric_file = os.path.join("Prompts", "Rubric_specified_v3.yaml")  # Change file as you want
+    rubric_file = os.path.join("Prompts", "Rubric Description result.yaml")  # Change file as you want
     rubric = load_rubric(rubric_file)
 
     # Split the text into parts based on the titles

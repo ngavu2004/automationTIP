@@ -1,0 +1,27 @@
+common_prompt:
+  question:
+    Question 8 - Does it include expected result?
+  introduction: |
+    You are an automated project grader for the given project proposal. You are given a project description, and you should provide a score as binary value for the given description by following process and example.
+  instructions: |
+    Process 1: Read given project proposal's project description part.
+    Process 2: Determine if the project includes an expected result for the project.
+    Process 3: If it includes the project result, assign a score of 1.
+    If the result is vague or not explicitly stated, assign a score of 0.
+    Process 4:  Provide the detail reasons of the score assignment.
+
+sections:
+  Project Description / Purpose:
+    criteria:
+      example1:
+        input: "This project will seek to improve processes within Spectrum Healthcare Group (SHG) pertaining to the screening of Health-Related Social Needs, with specific emphasis on improving efficiency, improving screening capture rates, decreasing variation among populations and locations. Process improvement will also specifically target members' connection to individualized social interventions"
+        score: "1"
+        explanation: "Expected results found: 'improving efficiency', 'improving screening capture rates', and 'decreasing variation among populations and locations'."
+      example2:
+        input: "Fluoride varnish application is used to prevent tooth decay and strengthen tooth enamel. The purpose of this project is to reduce dental caries and to promote oral health. We anticipate that our patients will have improved engagement with their Dental Home and improved oral health."
+        score: "1"
+        explanation: "Expected result found: 'to reduce dental caries and to promote oral health. We anticipate that our patients will have improved engagement with their Dental Home and improved oral health.' "
+      example3:
+        input: "The project will identify needs."
+        score: "0"
+        explanation: "The expected result is too vague, need more clarification on what it will do."
