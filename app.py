@@ -24,18 +24,18 @@ def delete_files(path):
 
 
 def home():
-    st.title("Welcome to AI Grader")
-    st.subheader("Your go-to application for download canvas submissions and generate AI-based grades")
+    st.title("Welcome to AI Evaluator")
+    st.subheader("Your go-to application for download canvas submissions and AI-based assessment")
 
     st.markdown("<hr style='border: 1px solid;'>", unsafe_allow_html=True)
 
     st.markdown("""
     ## About Us
-    AI Grader is an application that leverages Large Language Models to offer automatic grading from documents, built by a research team at Arizona State University.
+    AI Evaluator is an application that leverages Large Language Models to offer automatic assessment from documents, built by a research team at Arizona State University.
 
     ### Our Services
     - **Download Submissions:** Download multiple submissions from Canvas.
-    - **Grade Submissions:** Upload multiple PDF and docx documents to generate grades.
+    - **Evaluate Submissions:** Upload multiple PDF and docx documents to evaluate.
     """)
 
     st.markdown("<hr style='border: 1px solid;'>", unsafe_allow_html=True)
@@ -74,9 +74,9 @@ def download_submission():
 
 
 def generate_grade():
-    st.title("Grade Submissions")
-    st.subheader("Generating AI-based grades")
-    uploaded_file_original = st.file_uploader("Upload a file to grade: ", type=["pdf", "docx"], accept_multiple_files=True)
+    st.title("Evaluate Submissions")
+    st.subheader("Generating AI-based assessments")
+    uploaded_file_original = st.file_uploader("Upload a file to evaluate: ", type=["pdf", "docx"], accept_multiple_files=True)
     # col1, col2 = st.columns(2)
 
     # with col1:
@@ -108,8 +108,8 @@ def generate_grade():
         unsafe_allow_html=True
     )
 
-    if st.button("Start grading"):
-        with st.spinner("Grading documents..."):
+    if st.button("Start evaluating"):
+        with st.spinner("Evaluating documents..."):
             if uploaded_file_original is not None:
                 delete_files("Documents/NewlyUploaded")
 
@@ -128,7 +128,7 @@ def generate_grade():
 
                 # Prevent duplicated execution of the grading process
                 if 'is_running' in st.session_state and st.session_state['is_running']:
-                    st.warning("Grading is already in progress. Please wait.")
+                    st.warning("Evaluating is already in progress. Please wait.")
                     return
 
                 # Set the state to indicate grading is in progress
@@ -138,7 +138,7 @@ def generate_grade():
                     if result is not None:
                         # Add the file to the processed files set if grading is successful
                         st.session_state['processed_files'].add(file_name)
-                        st.success(f"Grading completed for {file_name}")
+                        st.success(f"Evaluating completed for {file_name}")
                     else:
                         pass
                 except Exception as e:
@@ -147,26 +147,26 @@ def generate_grade():
                     # Reset the state to indicate grading is no longer in progress
                     st.session_state['is_running'] = False
 
-                st.success("Grading Completed! All files have been processed.")
+                st.success("Evaluating Completed! All files have been processed.")
             else:
-                st.warning("Please upload files to grade.")
+                st.warning("Please upload files to evaluate.")
 
 
 def main():
     st.set_page_config(
-        page_title="AI Grader",
+        page_title="AI Evaluator",
         page_icon=":computer:",
         layout="wide",
         initial_sidebar_state="expanded")
 
     st.sidebar.title("Navigation")
-    page = st.sidebar.selectbox("Choose a page:", ["Home", "Download Submissions", "Grade Submissions"])
+    page = st.sidebar.selectbox("Choose a page:", ["Home", "Download Submissions", "Evaluate Submissions"])
 
     if page == "Home":
         home()
     elif page == "Download Submissions":
         download_submission()
-    elif page == "Grade Submissions":
+    elif page == "Evaluate Submissions":
         generate_grade()
 
 

@@ -1,7 +1,6 @@
 import re
 import os
 import camelot
-import pythoncom
 from docx2pdf import convert
 
 # Can be changed according to the input files (List of keywards need to be the header of the chunk)
@@ -156,9 +155,6 @@ def convert_docx_to_pdf(docxPath: str, is_rubric_path=False):
     local_pdf_path = os.path.join("Documents/NewlyUploaded", os.path.basename(pdfPath))
 
     try:
-        # Initialize COM for docx2pdf
-        pythoncom.CoInitialize()
-
         # Convert docx to pdf using docx2pdf
         convert(docxPath, local_pdf_path)
 
@@ -188,9 +184,5 @@ def convert_docx_to_pdf(docxPath: str, is_rubric_path=False):
     except Exception as e:
         print(f"[ERROR] An error occurred while converting the file: {e}")
         return None  # Return None if an error occurs
-
-    finally:
-        # Uninitialize COM after the process
-        pythoncom.CoUninitialize()
 
     return None
