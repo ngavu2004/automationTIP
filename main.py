@@ -27,7 +27,7 @@ def generate_grades():
     # rubricFileNamesWithExtension = os.listdir("Documents/NewlyUploaded/Rubric/")
 
     # Load the rubric from YAML
-    rubric_file = "Prompts/Rubric_specified_v3.yaml" # Change file as you want
+    rubric_file = "Prompts/Rubric_Description.yaml" # Change file as you want
     rubric = load_rubric(rubric_file)
 
     # Dynamically extract all sections
@@ -42,6 +42,9 @@ def generate_grades():
     # Initialize a set to track processed files
     processed_files = set()
 
+    # Initialize a global DataFrame for all results
+    all_results_df = pd.DataFrame(columns=["", "File_Name", "AI_Grade", "Comment", "Section", "Criteria"])
+
     # Process documents to be graded
     for fileNameWithExtension in fileNamesWithExtension:
         # print(f"[DEBUG] Processing file: {fileNameWithExtension}")
@@ -52,9 +55,6 @@ def generate_grades():
         # Extract file extension to differentiate between PDF and DOCX
         target_fileName, extension = os.path.splitext(fileNameWithExtension)
         extension = extension.lower()  # Normalize the extension to lowercase
-
-        # Initialize a DataFrame for each file
-        gradesDataframe = pd.DataFrame(columns=["", "File_Name", "AI_Grade", "Comment", "Section", "Criteria"])
 
         # Read PDF content
         if extension == ".pdf":
@@ -108,6 +108,9 @@ def generate_grades():
             print(f"[ERROR] Exception during LLM evaluation for {fileNameWithExtension}: {e}")
             continue
 
+        # Initialize a DataFrame for the current file
+        file_results_df = pd.DataFrame(columns=["", "File_Name", "AI_Grade", "Comment", "Section", "Criteria"])
+
         # Append the result to the DataFrame
         idx = 0
         for part_name, part_data in json_results.items():
@@ -124,14 +127,18 @@ def generate_grades():
                     "Section": part_name,
                     "Criteria": criterion["name"]
                 }
-                gradesDataframe = pd.concat([gradesDataframe, pd.DataFrame([new_entry])], ignore_index=True)
+                file_results_df = pd.concat([file_results_df, pd.DataFrame([new_entry])], ignore_index=True)
 
-        csv_file_name = "Documents/Results/Result.csv"
-        gradesDataframe.to_csv(csv_file_name, index=False, mode="a", header=not os.path.exists(csv_file_name))
-        print(f"Grades for {fileNameWithExtension} have been added to CSV.")
+        # Add the current file's results to the global DataFrame
+        all_results_df = pd.concat([all_results_df, file_results_df], ignore_index=True)
 
         # Mark the file as processed
         processed_files.add(fileNameWithExtension)
+
+    # Save the global results DataFrame to CSV
+    csv_file_name = "Documents/Results/Result.csv"
+    all_results_df.to_csv(csv_file_name, index=False, mode="w")  # Overwrite the file
+    print(f"All grades have been saved to {csv_file_name}.")
 
 
 if __name__ == "__main__":
