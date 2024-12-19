@@ -43,7 +43,7 @@ def generate_grades():
     processed_files = set()
 
     # Initialize a global DataFrame for all results
-    all_results_df = pd.DataFrame(columns=["", "File_Name", "AI_Grade", "Comment", "Section", "Criteria"])
+    all_results_df = pd.DataFrame(columns=["", "user_id", "AI_Grade", "Comment", "Section", "Criteria"])
 
     # Process documents to be graded
     for fileNameWithExtension in fileNamesWithExtension:
@@ -109,23 +109,20 @@ def generate_grades():
             continue
 
         # Initialize a DataFrame for the current file
-        file_results_df = pd.DataFrame(columns=["", "File_Name", "AI_Grade", "Comment", "Section", "Criteria"])
+        file_results_df = pd.DataFrame(columns=["", "user_id", "AI_Grade", "Comment", "Section", "Criteria"])
 
         # Append the result to the DataFrame
         idx = 0
         for part_name, part_data in json_results.items():
-            # criteria_list = rubric.get(part_name, {}).get("criteria", [])
-            criteria_list = rubric_sections.get(part_name, {}).get("criteria", [])
-
-            for criteria_data, criterion in zip(part_data.values(), criteria_list):
+            for question, criterion_data in part_data.items():
                 idx += 1
                 new_entry = {
                     "": idx,
-                    "File_Name": target_fileName,
-                    "AI_Grade": criteria_data.get("score", ""),
-                    "Comment": criteria_data.get("explanation", ""),
+                    "user_id": target_fileName,
+                    "AI_Grade": criterion_data.get("score", ""),
+                    "Comment": criterion_data.get("explanation", ""),
                     "Section": part_name,
-                    "Criteria": criterion["name"]
+                    "Criteria": question
                 }
                 file_results_df = pd.concat([file_results_df, pd.DataFrame([new_entry])], ignore_index=True)
 

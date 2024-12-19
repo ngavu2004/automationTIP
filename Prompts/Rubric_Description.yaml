@@ -6,6 +6,7 @@ common_prompt:
     2. Provide a brief explanation for the score.
         - If the score is 0, explain what was missing or insufficient.
         - If the score is 1, explain what was well-done.
+    3. Respond **only** with JSON.
 
 sections:
   Project Description / Purpose:

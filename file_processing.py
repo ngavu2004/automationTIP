@@ -3,7 +3,7 @@ import os
 import camelot
 from docx2pdf import convert
 
-# Can be changed according to the input files (List of keywards need to be the header of the chunk)
+# Can be changed according to the input files (List of keywords need to be the header of the chunk)
 line_break_keywords = ["Project Overview", "Timeline", "Project Scope", "Project Team", "Signatures"]
 
 

@@ -1,4 +1,5 @@
 __pycache__
+.DS_Store
 Documents/NewlyUploaded/*
 Documents/AlreadyRead/*
 Documents/Results/*

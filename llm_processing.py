@@ -1,5 +1,7 @@
+import re
 import os
 import yaml
+import json
 from string import Template
 from dotenv import load_dotenv
 from Helper.logging import langsmith
@@ -150,13 +152,20 @@ def evaluate_question(text: str, rubric: dict, part_name: str, question: dict, c
         return None
 
 
-def evaluate_section_by_questions(text: str, rubric: dict, part_name: str, chain):
+def evaluate_section_by_questions(text: str, rubric: dict, part_name: str, chain, all_parts: dict):
     section = rubric.get("sections", {}).get(part_name, {})
     criteria = section.get("criteria", [])
 
+    # If Project Scope sectioin, add Project Description / Purpose chunk
+    if part_name == "Project Scope" and "Project Description / Purpose" in all_parts:
+        combined_text = f"Project Description / Purpose:\n{all_parts['Project Description / Purpose']}\n\n" \
+                        f"{part_name}:\n{text}"
+    else:
+        combined_text = text
+
     section_results = {}
     for question in criteria:
-        question_result = evaluate_question(text, rubric, part_name, question, chain)
+        question_result = evaluate_question(combined_text, rubric, part_name, question, chain)
         if not question_result:
             continue
 
@@ -171,35 +180,41 @@ def evaluate_section_by_questions(text: str, rubric: dict, part_name: str, chain
 # Extract and Parsing JSON part from LLM response
 def extract_and_parse_json(llm_response: str, part_name: str):
     # Extract JSON part from LLM response
-    json_start_index = llm_response.find("{")
-    json_end_index = llm_response.rfind("}") + 1
-
-    if json_start_index == -1 or json_end_index == -1 or json_end_index <= json_start_index:
+    json_match = re.search(r'\{.*\}', llm_response, re.DOTALL)
+    if not json_match:
         print(f"[ERROR] No valid JSON found in LLM response for {part_name}: {llm_response}")
         return None
 
-    json_data = llm_response[json_start_index:json_end_index]
+    json_data = json_match.group()
 
-    # Modifying incomplete JSON format
-    if json_data.count('{') != json_data.count('}'):
-        missing_brackets = json_data.count('{') - json_data.count('}')
-        json_data += '}' * missing_brackets
-
-    # Parsing JSON data
     try:
-        result = yaml.safe_load(json_data)
-        # print(f"Parsed JSON for {part_name}: \n {result}")
-        if not result:
-            print(f"[ERROR] Parsed JSON is empty or invalid for {part_name}")
+        result = json.loads(json_data)
         return result
-    except Exception as e:
-        print(f"[ERROR] Parsing JSON for {part_name}: {e}")
-        print(f"[ERROR] Invalid JSON content: {json_data}")
-        return None
+    except json.JSONDecodeError as e:
+        print(f"[WARNING] JSON parsing failed: {e}")
+        print(f"[DEBUG] Attempting to fix JSON...")
+
+        fixed_json = fix_broken_json(json_data)
+
+        try:
+            result = json.loads(fixed_json)
+            print(f"[INFO] JSON successfully fixed for {part_name}")
+            return result
+        except Exception as e:
+            print(f"[ERROR] Failed to fix JSON: {e}")
+            return None
+
+
+def fix_broken_json(json_str: str) -> str:
+    json_str = re.sub(r'(\{[^\}]+?)"([a-zA-Z0-9_\- ]+)":', r'\1,"\2":', json_str)
+    json_str = re.sub(r',\s*}', '}', json_str)
+    json_str = json_str.replace('\n', '')
+    json_str = json_str.replace('}{', '},{')
+    return json_str
 
 
 def evaluate_document_with_prompt(text: str):
-    rubric_file = os.path.join("Prompts", "Rubric_Description.yaml")
+    rubric_file = os.path.join("Prompts", "Rubric_Scope.yaml")
     rubric = load_rubric(rubric_file)
     parts = split_text_by_parts(text, output_dir)
 
@@ -209,7 +224,7 @@ def evaluate_document_with_prompt(text: str):
 
     for part_name, part_text in parts.items():
         print(f"Evaluating part '{part_name}' by questions...")
-        part_result = evaluate_section_by_questions(part_text, rubric, part_name, chain)
+        part_result = evaluate_section_by_questions(part_text, rubric, part_name, chain, parts)
         if part_result:
             results.update(part_result)
 
