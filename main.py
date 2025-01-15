@@ -3,7 +3,7 @@ import pandas as pd
 from dotenv import load_dotenv
 from Helper.logging import langsmith
 from file_processing import check_directory, read_pdf_text, convert_docx_to_pdf
-from llm_processing import evaluate_document_with_prompt, load_rubric
+from llm_processing import evaluate_document_with_prompt, load_rubric, rubric_file
 
 # Load environment settings
 load_dotenv()
@@ -27,7 +27,7 @@ def generate_grades():
     # rubricFileNamesWithExtension = os.listdir("Documents/NewlyUploaded/Rubric/")
 
     # Load the rubric from YAML
-    rubric_file = "Prompts/Rubric_Description.yaml" # Change file as you want
+    # rubric_file = "Prompts/Rubric_Scope.yaml" # Change file as you want
     rubric = load_rubric(rubric_file)
 
     # Dynamically extract all sections
@@ -103,7 +103,7 @@ def generate_grades():
 
             if not json_results:
                 print("[ERROR] No response from LLM for {fileNameWithExtension}.")
-                return
+                continue
         except Exception as e:
             print(f"[ERROR] Exception during LLM evaluation for {fileNameWithExtension}: {e}")
             continue

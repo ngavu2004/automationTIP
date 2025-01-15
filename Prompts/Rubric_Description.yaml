@@ -1,12 +1,12 @@
 common_prompt:
   introduction: |
-    You are an automated project grader for the given project proposal. You are given a project description, and you should provide a score as binary value for the given description by following process and example.
+    You are an automated project grader tasked with evaluating a project proposal. Based on the provided description, assign a binary score (0 or 1) following the evaluation process and examples.
   instructions: |
-    1. Assign a binary score of either 0 or 1.
-    2. Provide a brief explanation for the score.
-        - If the score is 0, explain what was missing or insufficient.
-        - If the score is 1, explain what was well-done.
-    3. Respond **only** with JSON.
+    1. Assign a score of 0 or 1 based on the criteria.
+    2. Provide a short explanation for your score.
+        - If the score is 0, explain what was missing or unclear.
+        - If the score is 1, explain what was correctly included.
+    3. Respond **only** with JSON format.
 
 sections:
   Project Description / Purpose:

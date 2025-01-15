@@ -132,7 +132,8 @@ def extract_data(file_path):
             row_str = "".join(row_cells).rstrip()
 
             # If any keyword from the list appears at the beginning of the row, add a line break
-            if any(row_str.strip().startswith(keyword) and row_str.strip() == keyword for keyword in line_break_keywords):
+            if any(row_str.strip().startswith(keyword + ":") or row_str.strip() == keyword for keyword in line_break_keywords):
+            # if any(row_str.strip().startswith(keyword) and row_str.strip() == keyword for keyword in line_break_keywords): 
                 formatted_data += "\n\n"
 
             formatted_data += row_str + "\n"

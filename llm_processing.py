@@ -12,6 +12,7 @@ from langchain.chains.question_answering import load_qa_chain
 
 
 output_dir = "chunk"
+rubric_file = "Prompts/Rubric_Overview.yaml" # Change file as you want
 
 load_dotenv()
 
@@ -50,7 +51,8 @@ def split_text_by_parts(text: str, output_dir: str):
         stripped_line = line.strip()
 
         # Detect part titles (only if it's a standalone title line)
-        if stripped_line in part_titles and line == stripped_line and stripped_line not in title_processed:
+        if any(stripped_line.rstrip(":") == title for title in part_titles) and line == stripped_line and stripped_line not in title_processed:
+        # if stripped_line in part_titles and line == stripped_line and stripped_line not in title_processed:
             if current_part:
                 # Replace '/' with '_' in the current part name for the filename
                 safe_part_name = current_part.replace("/", "_")
@@ -59,7 +61,7 @@ def split_text_by_parts(text: str, output_dir: str):
                 with open(os.path.join(output_dir, f"{safe_part_name}.txt"), "w") as f:
                     f.write(chunks[current_part])
 
-            current_part = stripped_line  # Start a new part
+            current_part = stripped_line.rstrip(":")  # Start a new part
             buffer = []  # Reset the buffer for the new part
             title_processed.add(current_part)
         elif current_part:  # Continue accumulating lines for the current part
@@ -206,15 +208,25 @@ def extract_and_parse_json(llm_response: str, part_name: str):
 
 
 def fix_broken_json(json_str: str) -> str:
-    json_str = re.sub(r'(\{[^\}]+?)"([a-zA-Z0-9_\- ]+)":', r'\1,"\2":', json_str)
-    json_str = re.sub(r',\s*}', '}', json_str)
-    json_str = json_str.replace('\n', '')
+    # Add missing opening and closing curly brackets if necessary
+    if not json_str.startswith("{"):
+        json_str = "{" + json_str
+    if not json_str.endswith("}"):
+        json_str = json_str + "}"
+
+    # Remove any double curly brackets caused by concatenation issues
     json_str = json_str.replace('}{', '},{')
+
+    # Remove unnecessary commas before closing brackets
+    json_str = re.sub(r',\s*}', '}', json_str)
+
+    # Ensure proper spacing and formatting
+    json_str = json_str.replace('\n', '').replace('\r', '')
+
     return json_str
 
 
 def evaluate_document_with_prompt(text: str):
-    rubric_file = os.path.join("Prompts", "Rubric_Scope.yaml")
     rubric = load_rubric(rubric_file)
     parts = split_text_by_parts(text, output_dir)
 
