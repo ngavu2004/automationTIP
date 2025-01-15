@@ -4,7 +4,7 @@ common_prompt:
   introduction: |
     You are an automated project grader for the given project proposal. You are given a project description, and you should provide a score as binary value for the given description by following process and example.
   instructions: |
-    Process 1: Read given project proposal’s project description part.
+    Process 1: Read given project proposal's project description part.
     Process 2: Determine if the project description describes the background of the project or what will the project  do.
     Process 3: If it describes the project clearly, assign a score of 1.
     If the description was not provided or too short (less than 2 sentences) , assign a score of 0.

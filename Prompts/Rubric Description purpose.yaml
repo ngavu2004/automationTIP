@@ -4,7 +4,7 @@ common_prompt:
   introduction: |
     You are an automated project grader for the given project proposal. You are given a project description, and you should provide a score as binary value for the given description by following process and example.
   instructions: |
-    Process 1: Read given project proposal’s project description part.
+    Process 1: Read given project proposal's project description part.
     Process 2: Determine if the project includes a clear and explicit purpose statement (e.g., phrases like "The purpose of this project is..." or "This project is to...").
     Process 3: If it includes the project purpose clearly, assign a score of 1.
     If the purpose is vague or not explicitly stated, assign a score of 0.
