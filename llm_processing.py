@@ -108,7 +108,6 @@ def generate_prompt(rubric: dict, part_name: str, question: dict, input_text: st
     prompt_template = Template(f"""
     {introduction}
 
-    Instructions:
     {instructions}
 
     {question_text}
@@ -132,7 +131,8 @@ def generate_prompt(rubric: dict, part_name: str, question: dict, input_text: st
         question_text=question_text,
         examples_text=examples_text,
         part_name=part_name,
-        input_text=input_text
+        input_text=input_text,
+        examples=examples
     )
 
 
