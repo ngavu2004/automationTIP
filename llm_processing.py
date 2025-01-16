@@ -185,7 +185,7 @@ def extract_and_parse_json(llm_response: str, part_name: str):
     json_match = re.search(r'\{.*\}', llm_response, re.DOTALL)
     if not json_match:
         print(f"[ERROR] No valid JSON found in LLM response for {part_name}: {llm_response}")
-        return None
+        return fix_json_with_llm(llm_response, part_name)
 
     json_data = json_match.group()
 
@@ -196,34 +196,51 @@ def extract_and_parse_json(llm_response: str, part_name: str):
         print(f"[WARNING] JSON parsing failed: {e}")
         print(f"[DEBUG] Attempting to fix JSON...")
 
-        fixed_json = fix_broken_json(json_data)
+        # If parsing fails, try fixing with LLM
+        return fix_json_with_llm(json_data, part_name)      
 
-        try:
-            result = json.loads(fixed_json)
-            print(f"[INFO] JSON successfully fixed for {part_name}")
-            return result
-        except Exception as e:
-            print(f"[ERROR] Failed to fix JSON: {e}")
+
+# Prompt LLM to fix borken JSON responses
+def fix_json_with_llm(broken_response: str, part_name: str):
+    print(f"[INFO] Attempting to fix JSON for part '{part_name}' using LLM...")
+
+    try:
+        llm = ChatOllama(model="llama3")
+        chain = load_qa_chain(llm=llm)
+
+        # Create a repair prompt for the LLM
+        prompt = f"""
+        The following response contains a broken JSON format. Your task is to fix the JSON and return a valid JSON object.
+
+        Input:
+        {broken_response}
+
+        Instructions:
+        1. Ensure the JSON is valid and contains proper opening and closing braces.
+        2. Use double quotes for all keys and values unless the value requires single quotes inside.
+        3. Do not add or remove any keys. Correct only the formatting issues.
+        4. Return only the fixed JSON object.
+
+        Respond strictly in JSON format.
+        """
+
+        # Run the chain with the repair prompt
+        document = [Document(page_content=broken_response)]
+        with get_openai_callback() as callback:
+            fixed_response = chain.run(input_documents=document, question=prompt)
+
+        # Attempt to parse the fixed JSON
+        json_match = re.search(r'\{.*\}', fixed_response, re.DOTALL)
+        if not json_match:
+            print(f"[ERROR] LLM did not return valid JSON for {part_name}: {fixed_response}")
             return None
 
+        fixed_json = json_match.group()
+        return json.loads(fixed_json)
 
-def fix_broken_json(json_str: str) -> str:
-    # Add missing opening and closing curly brackets if necessary
-    if not json_str.startswith("{"):
-        json_str = "{" + json_str
-    if not json_str.endswith("}"):
-        json_str = json_str + "}"
-
-    # Remove any double curly brackets caused by concatenation issues
-    json_str = json_str.replace('}{', '},{')
-
-    # Remove unnecessary commas before closing brackets
-    json_str = re.sub(r',\s*}', '}', json_str)
-
-    # Ensure proper spacing and formatting
-    json_str = json_str.replace('\n', '').replace('\r', '')
-
-    return json_str
+    except Exception as e:
+        print(f"[ERROR] Failed to fix JSON with LLM for {part_name}: {e}")
+        return None
 
 
 def evaluate_document_with_prompt(text: str):
