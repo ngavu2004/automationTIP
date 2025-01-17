@@ -1,0 +1,60 @@
+Project Description:
+  criteria:
+    - name: "Question 1. Does the value of the 'Project Name:' attribute exist in the file?"
+      grade_range: "0-2"
+    - name: "Question 2. Does the value of the 'Clinic:' attribute exist in the file?"
+      grade_range: "0-2"
+    - name: "Question 3. Does the value of the 'Process:' attribute exist in the file?"
+      grade_range: "0-2"
+    - name: "Question 4. Does the value of the 'TIP 2.0 Process Milestone:' attribute exist in the file?"
+      grade_range: "0-2"
+    - name: "Question 5. Does the value of the 'TIP 2.0 Process Milestone:' attribute provide specific process milestone details?"
+      grade_range: "0-2"
+    - name: "Question 6. Does the value of the 'Project Description' attribute include a brief description of the project?"
+      grade_range: "0-5"
+    - name: "Question 7. Does the value of the 'Project Description' attribute include a sentence that explicitly state the aims or purpose of the project?"
+      grade_range: "0-5"
+    - name: "Question 8. Does the value of the 'Project Description' attribute include detailed expected results from the project?"
+      grade_range: "0-5"
+  
+Project Overview:
+  criteria:
+    - name: "Question 1. Does the value of the 'Problem Summary:' attribute include a detailed (at least 1 sentence) and logical problem statement?"
+      grade_range: "0-9"
+    - name: "Question 2. Does the value of the 'Desired Outcome(s):' attribute include a at least 1 sentence explicitly talking about the expected results/desired outcomes?"
+      grade_range: "0-8"
+    - name: "Question 3. Does the value of the 'Benefits:' attribute include a detailed (at least 1 sentence) explicitly talking about the benefits of this project?"
+      grade_range: "0-8"
+
+Timeline:
+  criteria:
+    - name: "Question 1. Does the task list contain a comprehensive set of key tasks? (Evaluate all tasks together)"
+      grade_range: "0-10"
+    - name: "Question 2. Does the task list contain specific planned completion due dates for each task? (Evaluate all tasks together)"
+      grade_range: "0-10"
+
+Project Scope:
+  criteria:
+    - name: "Question 1. Does the value of the 'In Scope Project Objectives' attribute include an aligned objectives with the project purpose?"
+      grade_range: "0-8"
+    - name: "Question 2. Does the value of the 'Out of Scope Project Objectives or Activities' attribute include an aligned objectives with the project purpose?"
+      grade_range: "0-7"
+
+Project Team:
+  criteria:
+    - name: "Question 1. Does the value of the 'Team Lead:' attribute contain an individual's name?"
+      grade_range: "0-2"
+    - name: "Question 2. Does the value of the 'Project Champion:' attribute contain an individual's name?"
+      grade_range: "0-2"
+    - name: "Question 3. Does the value of the 'Process Owner:' attribute contain an individual's name?"
+      grade_range: "0-2"
+    - name: "Question 4. Does the value of the 'Process Manager:' attribute contain an individual's name?"
+      grade_range: "0-2"
+    - name: "Question 5. Does the value of the 'Stakeholders' stakeholder attribute contain an individual's name?"
+      grade_range: "0-2"
+    - name: "Question 6. Does the 'Stakeholders' contain values for the attributes: stakeholder, title, department, and organization?"
+      grade_range: "0-2"
+    - name: "Question 7. Does the value of the 'Project Team Members' Name attribute contain an individual's name?"
+      grade_range: "0-2"
+    - name: "Question 8. Do the 'Project Team Members' contain role values for the 'Team role' attribute?"
+      grade_range: "0-1"

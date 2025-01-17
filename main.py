@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+import csv   # Added to write the result to a csv file
 from dotenv import load_dotenv
 from Helper.logging import langsmith
 from file_processing import check_directory, read_pdf_text, convert_docx_to_pdf
