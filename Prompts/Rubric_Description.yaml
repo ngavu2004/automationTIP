@@ -11,52 +11,6 @@ common_prompt:
 sections:
   Project Description / Purpose:
     criteria:
-      - name: "Question 1. Does the Project name exist and enough to describe the project?"
-      - name: "Question 2. Does the Clinic name exist and tell the clinic names?"
-      - name: "Question 3. Does the Process name exist and tell the process names?"
-      - name: "Question 4. Does the TIP 2.0 Milestone exist and tell the milestone?"
-        example1:
-          input: "Milestone 1.5 Health Equity"
-          score: "1"
-          explanation: "TIP 2.0 Milestone exists: 'Milestone 1.5', and tells about the milestone: 'Health Equity'"
-        example2:
-          input: "5D: Identify health inequities"
-          score: "1"
-          explanation: "TIP 2.0 Milestone exists: '5D', and tells about the milestone: 'Identify health inequities'"
-        example3:
-          input: "Milestone 1.5"
-          score: "0"
-          explanation: "TIP 2.0 Milestone exists: 'Milestone 1.5', but doesn't tell about the milestone"
-        example4:
-          input: "Health Equity"
-          score: "0"
-          explanation: "TIP 2.0 Milestone is not found, but tells about the milestone: 'Health Equity'"
-        example5:
-          input: "Identify Health Inequities and Health-related social needs"
-          score: "0"
-          explanation: "TIP 2.0 Milestone is not found, but tells about the milestone: 'Identify Health Inequities and Health-related social needs'"
-      - name: "Question 5. Does TIP 2.0 Milestone details the project milestone?"
-        example1:
-          input: "Milestone 1.5 Health Equity"
-          score: "1"
-          explanation: "TIP 2.0 Milestone exists: 'Milestone 1.5', and has details about the milestone: 'Health Equity'"
-        example2:
-          input: "5D: Identify health inequities"
-          score: "1"
-          explanation: "TIP 2.0 Milestone exists: '5D', and has details about the milestone: 'Identify health inequities'"
-        example3:
-          input: "Milestone 1.5"
-          score: "0"
-          explanation: "TIP 2.0 Milestone exists: 'Milestone 1.5', but doesn't have details about the milestone"
-        example4:
-          input: "Health Equity"
-          score: "0"
-          explanation: "TIP 2.0 Milestone is not found, but has details about the milestone: 'Health Equity'"
-        example5:
-          input: "Identify Health Inequities and Health-related social needs"
-          score: "0"
-          explanation: "TIP 2.0 Milestone is not found, but has details about the milestone: 'Identify Health Inequities and Health-related social needs'"
-
       - name: "Question 6. Does the Project Description / Purpose includes a brief description of the project?"
         extra instructions: |
           Process 1: Read given project proposal’s project description part.
