@@ -13,7 +13,7 @@ sections:
     criteria:
       - name: "Question 6. Does the Project Description / Purpose includes a brief description of the project?"
         extra instructions: |
-          Process 1: Read given project proposal’s project description part.
+          Process 1: Read given project proposal's project description part.
           Process 2: Determine if the project description describes the background of the project or what will the project do.
           Process 3: If it describes the project clearly, assign a score of 1. If the description was not provided or too short (less than 2 sentences) , assign a score of 0.
           Process 4: Provide the detail reasons of the score assignment.
@@ -28,7 +28,7 @@ sections:
 
       - name: "Question 7. Does the Project Description / Purpose includes a sentence explicitly stating the purpose of the project that starts with phrases like 'The purpose of this project is to implement a ...'"
         extra instructions: |
-          Process 1: Read given project proposal’s project description part.
+          Process 1: Read given project proposal's project description part.
           Process 2: Determine if the project includes a clear and explicit purpose statement (e.g., phrases like "The purpose of this project is..." or "This project is to...").
           Process 3: If it includes the project purpose clearly, assign a score of 1. If the purpose is vague or not explicitly stated, assign a score of 0.
           Process 4: Provide the detail reasons of the score assignment.

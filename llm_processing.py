@@ -12,7 +12,7 @@ from langchain.chains.question_answering import load_qa_chain
 
 
 output_dir = "chunk"
-rubric_file = "Prompts/Rubric_Overview.yaml" # Change file as you want
+rubric_file = "Prompts/Rubric_Scope.yaml" # Change file as you want
 
 load_dotenv()
 
