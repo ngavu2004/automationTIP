@@ -46,30 +46,53 @@ def split_text_by_parts(text: str, output_dir: str):
     # Normalize text (strip leading/trailing spaces and replace newlines)
     normalized_lines = [line.strip() for line in text.splitlines()]
 
+    def match_title_with_whitespace_variations(line, title):
+        # Create regex pattern to handle multiple spaces or tabs between words
+        regex_title = r"\s*".join(re.escape(word) for word in title.split())
+        return re.match(fr"^{regex_title}[:\s\t]*$", line)
+    
+    # Normalize the title for consistent file naming and matching
+    def normalize_title(title):
+        return title.replace("/", "_").strip()
+
+    # Add content before the first title to the first title's file
+    first_title_found = False
+    first_title = part_titles[0]
+
     # for line in text.splitlines():
     for line in normalized_lines:
         stripped_line = line.strip()
 
-        # Detect part titles (only if it's a standalone title line)
-        if any(stripped_line.rstrip(":") == title for title in part_titles) and line == stripped_line and stripped_line not in title_processed:
-        # if stripped_line in part_titles and line == stripped_line and stripped_line not in title_processed:
+        # Detect part titles (match titles even with varying spaces or tabs)
+        matched_title = next((title for title in part_titles if match_title_with_whitespace_variations(stripped_line, title)), None)
+        if matched_title and matched_title not in title_processed:
             if current_part:
-                # Replace '/' with '_' in the current part name for the filename
-                safe_part_name = current_part.replace("/", "_")
+                # Use normalized title for consistent file naming
+                safe_part_name = normalize_title(current_part)
                 chunks[current_part] = "\n".join(buffer)  # Save the content of the previous part
-                # Save the chunk to a txt file(Debug)
+                # Save the chunk to a txt file
                 with open(os.path.join(output_dir, f"{safe_part_name}.txt"), "w") as f:
                     f.write(chunks[current_part])
 
-            current_part = stripped_line.rstrip(":")  # Start a new part
+            current_part = matched_title  # Set the new part
             buffer = []  # Reset the buffer for the new part
-            title_processed.add(current_part)
+            title_processed.add(matched_title)
+
+            # Handle content before the first title
+            if not first_title_found and matched_title == first_title:
+                first_title_found = True
+                chunks[first_title] = "\n".join(buffer)  # Save the buffer as the first title's content
+                with open(os.path.join(output_dir, f"{normalize_title(first_title)}.txt"), "w") as f:
+                    f.write(chunks[first_title])
+
+                # Clear the buffer for subsequent parts
+                buffer = []
+
         elif current_part:  # Continue accumulating lines for the current part
             buffer.append(line)
 
     if current_part:  # Save the last part
-        # Replace '/' with '_' in the current part name for the filename
-        safe_part_name = current_part.replace("/", "_")
+        safe_part_name = normalize_title(current_part)
         chunks[current_part] = "\n".join(buffer)
         # Save the last chunk to a txt file (Debug)
         with open(os.path.join(output_dir, f"{safe_part_name}.txt"), "w") as f:
@@ -188,6 +211,16 @@ def extract_and_parse_json(llm_response: str, part_name: str):
         return fix_json_with_llm(llm_response, part_name)
 
     json_data = json_match.group()
+
+    # Check bracket balance
+    if json_data.count('{') != json_data.count('}'):
+        print(f"[WARNING] Unbalanced brackets found in JSON for {part_name}. Attempting to fix...")
+        
+        # Auto-fix missing brackets
+        while json_data.count('{') > json_data.count('}'):
+            json_data += "}"
+        while json_data.count('}') > json_data.count('{'):
+            json_data = "{" + json_data
 
     try:
         result = json.loads(json_data)
