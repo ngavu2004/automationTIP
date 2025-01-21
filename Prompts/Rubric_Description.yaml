@@ -11,55 +11,9 @@ common_prompt:
 sections:
   Project Description / Purpose:
     criteria:
-      - name: "Question 1. Does the Project name exist and enough to describe the project?"
-      - name: "Question 2. Does the Clinic name exist and tell the clinic names?"
-      - name: "Question 3. Does the Process name exist and tell the process names?"
-      - name: "Question 4. Does the TIP 2.0 Milestone exist and tell the milestone?"
-        example1:
-          input: "Milestone 1.5 Health Equity"
-          score: "1"
-          explanation: "TIP 2.0 Milestone exists: 'Milestone 1.5', and tells about the milestone: 'Health Equity'"
-        example2:
-          input: "5D: Identify health inequities"
-          score: "1"
-          explanation: "TIP 2.0 Milestone exists: '5D', and tells about the milestone: 'Identify health inequities'"
-        example3:
-          input: "Milestone 1.5"
-          score: "0"
-          explanation: "TIP 2.0 Milestone exists: 'Milestone 1.5', but doesn't tell about the milestone"
-        example4:
-          input: "Health Equity"
-          score: "0"
-          explanation: "TIP 2.0 Milestone is not found, but tells about the milestone: 'Health Equity'"
-        example5:
-          input: "Identify Health Inequities and Health-related social needs"
-          score: "0"
-          explanation: "TIP 2.0 Milestone is not found, but tells about the milestone: 'Identify Health Inequities and Health-related social needs'"
-      - name: "Question 5. Does TIP 2.0 Milestone details the project milestone?"
-        example1:
-          input: "Milestone 1.5 Health Equity"
-          score: "1"
-          explanation: "TIP 2.0 Milestone exists: 'Milestone 1.5', and has details about the milestone: 'Health Equity'"
-        example2:
-          input: "5D: Identify health inequities"
-          score: "1"
-          explanation: "TIP 2.0 Milestone exists: '5D', and has details about the milestone: 'Identify health inequities'"
-        example3:
-          input: "Milestone 1.5"
-          score: "0"
-          explanation: "TIP 2.0 Milestone exists: 'Milestone 1.5', but doesn't have details about the milestone"
-        example4:
-          input: "Health Equity"
-          score: "0"
-          explanation: "TIP 2.0 Milestone is not found, but has details about the milestone: 'Health Equity'"
-        example5:
-          input: "Identify Health Inequities and Health-related social needs"
-          score: "0"
-          explanation: "TIP 2.0 Milestone is not found, but has details about the milestone: 'Identify Health Inequities and Health-related social needs'"
-
       - name: "Question 6. Does the Project Description / Purpose includes a brief description of the project?"
         extra instructions: |
-          Process 1: Read given project proposal’s project description part.
+          Process 1: Read given project proposal's project description part.
           Process 2: Determine if the project description describes the background of the project or what will the project do.
           Process 3: If it describes the project clearly, assign a score of 1. If the description was not provided or too short (less than 2 sentences) , assign a score of 0.
           Process 4: Provide the detail reasons of the score assignment.
@@ -74,7 +28,7 @@ sections:
 
       - name: "Question 7. Does the Project Description / Purpose includes a sentence explicitly stating the purpose of the project that starts with phrases like 'The purpose of this project is to implement a ...'"
         extra instructions: |
-          Process 1: Read given project proposal’s project description part.
+          Process 1: Read given project proposal's project description part.
           Process 2: Determine if the project includes a clear and explicit purpose statement (e.g., phrases like "The purpose of this project is..." or "This project is to...").
           Process 3: If it includes the project purpose clearly, assign a score of 1. If the purpose is vague or not explicitly stated, assign a score of 0.
           Process 4: Provide the detail reasons of the score assignment.
