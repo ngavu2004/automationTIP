@@ -2,7 +2,7 @@ common_prompt:
   introduction: |
     You are an automated project grader tasked with evaluating a project proposal. Based on the provided description, assign a binary score (0 or 1) following the evaluation process and examples.
   instructions: |
-    1. Assign a score of 0 or 1 based on the criteria.
+    1. Assign a score only of 0 or 1 based on the criteria.
     2. Provide a short explanation for your score.
         - If the score is 0, explain what was missing or unclear.
         - If the score is 1, explain what was correctly included.
@@ -11,55 +11,70 @@ common_prompt:
 sections:
   Project Overview:
     criteria:
-      - name: "Question 1. Does the value of the 'Problem Summary:' attribute include a detailed (at least 1 sentence) and logical problem statement?"
+      - name: "Question 1. Does the 'Problem Summary' clearly state the current issue or gap the project aims to address?"
         extra instructions: |
-          Process 1: Read given project proposal's project overview part.
-          Process 2: Determine if the problem summary describes the problem statement or the background of the project.
-          Process 3: If it describes the problem statement clearly, assign a score of 1. If the problem statement was not provided or too short (less than 2 sentences) , assign a score of 0.
-          Process 4: Provide the detail reasons of the score assignment.
+          Process 1: Check if the 'Problem Summary' section describes the current challenges or gaps that necessitate this project.
+          Process 2: Assign a score of 1 if the 'Problem Summary':
+            - Clearly identifies a problem or gap relevant to the project's purpose.
+            - Explains the significance of the issue and how it relates to the goals of the project.  
+          Process 3: Assign a score of 0 if the 'Problem Summary':
+            - Fails to clearly identify a problem or gap.
+            - Is overly vague, generic, or provides insufficient detail to understand the context or necessity of the project.
+          Process 4: Provide a brief explanation for the score.
         example1:
-          input: "Problem Summary:	Analyzing quality measures to address health equity involves a systematic approach to identify, evaluate, and improve health outcomes across different population groups. To fully engage in this process, there is a need to comprehensively understand and utilize the data that the organization has available. While we have a robust number of health data elements, we have not analyzed the data with respect to health equity."
+          input: "Many patients visiting family practice clinics face health challenges influenced by social determinants, such as inadequate housing, food insecurity, lack of transportation, and financial instability. These health-related social needs (HRSNs) often go unidentified and unaddressed during routine medical visits, leading to exacerbated health disparities and increased healthcare costs."
           score: "1"
-          explanation: "The problem summary is clear and detailed: need to analyze health equity data to improve health outcomes. It describes the problem statement well."
-        example2:
-          input: "Problem Summary:	We are currently only screening well child check visits, but some families do not have covered preventative care or miss their children or teens well child checks. This means that many families may not have received a HRSN Screening, and we may be unaware of significant social situations that can influence the health of themselves or their children and teens. We are also currently only using the screening Z Code (ICD-10) and appropriate Z code when the screening is positive. We need to implement G Codes."
-          score: "1"
-          explanation: "The problem summary is clear and detailed: need to implement G Codes for positive screenings. It describes the problem statement well."
-        example3:
-          input: "Problem Summary:	Health-related social needs are currently evaluated separately in multiple areas, across several assessments making it difficult to get a clear picture of the patient’s needs.  These assessments are completed by different staff members who the patient may not have rapport with yet causing them not to open up fully about their needs."
-          score: "0"
-          explanation: "I do not see enough detail on problem summary. Include historical data (empirical, or anecdotal) indicating how you know patients are not being open."
+          explanation: "The statement describes a logical problem statement and provides appropriate examples"
 
-      - name: "Question 2. Does the value of the 'Desired Outcome(s):' attribute include a at least 1 sentence explicitly talking about the expected results/desired outcomes?"
+      - name: "Question 2. Does the 'Desired Outcome(s)' clearly state achievable goals for the project?"
         extra instructions: |
-          Process 1: Read given project proposal's project overview part.
-          Process 2: Determine if the desired outcomes describe the expected results or the benefits of the project.
-          Process 3: If it describes the expected results clearly, assign a score of 1. If the expected results were not provided or too short (less than 2 sentences) , assign a score of 0.
-          Process 4: Provide the detail reasons of the score assignment.
+          Process 1: Review the provided 'Desired Outcomes(s)’ and determine whether it aligns with the issues identified in the 'Problem Summary'.
+          Process 2: Check if the outcomes are:
+            - **Achievable**: The statement should describe goals that are realistic and feasible within the project's scope, resources, and timeline. It should provide enough context to demonstrate how the outcomes address the identified problem.
+          Process 3: Assign a score of 1 if the outcomes:
+            - Clearly state achievable goals that address the issues outlined in the 'Problem Summary'
+            - Provide sufficient context to explain why the goals are feasible.
+          Process 4: Assign a score of 0 if the outcomes:
+            - Are overly vague or generic (e.g., "improve outcomes" without explaining how it will be done).
+            - Do not specify achievable goals or fail to align with the 'Problem Summary'
+          Process 5: Provide a brief explanation for the score.
         example1:
-          input: "Desired Outcome(s):	Through our data analysis we will be able to determine if there are inequities in any of the varied populations that we serve. Specifically, the desired outcome is to systematically identify and quantify health disparities across different demographic groups, including racial, ethnic, socioeconomic, and geographic groups. This could subsequently lead to improved health outcomes for all populations served, equitable access to our services, data-driven decision making, and continuous quality improvement."
+          input: "The Guidance Center’s desired outcome is to screen 85% of our members using the PRAPARE tool, and track services provided of 50% of our member indicative to PRAPARE screening results."
           score: "1"
-          explanation: "The expected result is clear and detailed: to identify and quantify health disparities across different demographic groups. It describes the expected results well."
+          explanation:  "The outcome is achievable as it focuses on using an existing tool (PRAPARE) and outlines a clear process (screening and service provision)."
         example2:
-          input: "Desired Outcome(s):	Increase the number of HRSN Screening to >85% of all visit types, excluding vaccine only visits. Utilize G and appropriate Z Codes every time a screening is completed."
+          input: "Increase the number of patients screened for HRSN and referred to CBO’s."
           score: "1"
-          explanation: "The expected result is clear and detailed: to increase the number of HRSN Screening to >85% of all visit types. It describes the expected results well."
+          explanation: "The outcome is realistic and aligns with addressing the HRSN gap."
         example3:
-          input: "Desired Outcome(s): Increase the number of HRSN/SDOH referrals for Open Hearts patients."
+          input: "Ensuring all patients health needs and social determinants are met"
           score: "0"
-          explanation: "I do not see enough details on desired outcomes. For future submissions, I recommend reporting problems unique to your facility and including quantitative desired outcomes (i.e. screen 80% of all new patient visits)."
+          explanation: "The outcome is vague and does not explain how it will be achieved or what actions will be taken."
 
-      - name: "Question 3. Does the value of the 'Benefits:' attribute include a detailed (at least 1 sentence) explicitly talking about the benefits of this project?"
+      - name: "Question 3. Does the 'Benefits' state the advantages or improvements the project will deliver?"
         extra instructions: |
-          Process 1: Read given project proposal's project overview part.
-          Process 2: Determine if the project description describes the background of the project or what will the project do.
-          Process 3: If it describes the project clearly, assign a score of 1. If the description was not provided or too short (less than 2 sentences) , assign a score of 0.
-          Process 4: Provide the detail reasons of the score assignment.
+          Process 1: If the specific section (Problem Summary, Desired Outcomes, Benefits) appears to be missing or unclear due to formatting issues:
+            - Identify the section title (Problem Summary, Desired Outcomes, Benefits) and extract the surrounding text above and below the title.
+            - If the surrounding text provides relevant context, use it to evaluate the section.
+            - If no relevant content is found in the surrounding text or other sections, explain that the section is missing due to formatting issues.
+          Process 2: Evaluate the 'Benefits' section, including:
+            - Text directly below the "Benefits:" title.
+            - If the "Benefits:" section is missing or empty, evaluate text below "Desired Outcomes" for relevant content.
+          Process 3: Evaluate the 'Benefits' using the following criteria:
+            - Relevant: Align with the project's goals and address the identified gaps.
+            - Feasible: Provide a logical improvement or advantage, even if they are generic.
+          Process 4: Assign a score of 1 if the 'Benefits' are relevant, and feasible, even if they are generic.
+          Process 5: Assign a score of 0 if the 'Benefits' are generic or fail to align with the project's objectives.
+          Process 6: The score should be binary only 0 or 1.
         example1:
-          input: "Benefits: We will be able to identify and address any inequities that we discover, enhancing our Population Health initiatives and activities. Immediate benefits include compliance with the TIP 2.0 Health Equity Milestone and the ability to identify specific interventions that align with data. Long term benefits include increased quality of care by addressing gaps and disparities identified through quality measures."
+          input: "The success of this project will meet the diverse needs of our underserved patients, leading to lower healthcare expenses through improved patient adherence and reduced use of high-cost and otherwise unnecessary services"
           score: "1"
-          explanation: "The benefit is clear and detailed: to identify and address inequities, enhancing Population Health initiatives. It describes the benefits well."
+          explanation: "The benefits are specific (lower healthcare expenses, improved adherence) and relevant to the project's goals."
         example2:
-          input: "Benefits: The success of this project will allow us to help connect patients and families to resources and support more readily.  It will also help us report this information accurately to quality programs."
+          input: "The success of this project will increase our chance for identifying parents and caregivers with PeriPartum depression and/or anxiety at an early stage, allowing for referral of those individuals to our integrated behavioral health, and/or external resources."
           score: "1"
-          explanation: "The benefit is clear and detailed: to help connect patients and families to resources and support. It describes the benefits well."
+          explanation: "The benefits are specific (early identification and referral) and aligned with improving access to mental health resources."
+        example3:
+          input: "To ensure patients with positive/negative screens are being recognized by both the practice and the health plans "
+          score: "0"
+          explanation: "The benefits are vague and do not explain what specific advantages or improvements will result from the project."
