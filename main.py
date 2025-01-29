@@ -95,7 +95,7 @@ def generate_grades():
             continue
 
         # Read the final output file content
-        with open(final_output, "r") as final_file:
+        with open(final_output, "r", encoding='utf-8-sig') as final_file:
             fileContent = final_file.read()
 
         # Evaluate the document using LLM

@@ -97,7 +97,7 @@ def split_text_by_parts(text: str, output_dir: str):
         chunks[current_part] = "\n".join(buffer)
 
     for part_name, content in chunks.items():
-        with open(os.path.join(output_dir, f"{part_name.replace('/', '_')}.txt"), "w") as f:
+        with open(os.path.join(output_dir, f"{part_name.replace('/', '_')}.txt"), "w", encoding='utf-8-sig') as f:
             f.write(content)
 
     return chunks
