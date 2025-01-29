@@ -156,7 +156,6 @@ def generate_prompt(rubric: dict, part_name: str, question: dict, input_text: st
         examples_text=examples_text,
         part_name=part_name,
         input_text=input_text,
-        examples=examples
     )
 
 
