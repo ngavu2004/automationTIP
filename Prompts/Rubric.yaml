@@ -15,7 +15,7 @@ sections:
         extra instructions: |
           Process 1: Read given project proposal’s project description section.
           Process 2: Determine if the project description describes the background of the project or what will the project do.
-          Process 3: If it describes the project clearly, assign a score of 1. If the description was not provided or too short (less than 2 sentences) , assign a score of 0.
+          Process 3: If it describes the project clearly, assign a score of 1. If the description was not provided or too short (less than 2 sentences), assign a score of 0.
         example1:
           input: "Screening clients for Health-Related Social Needs (HRSN) using an evidenced based screening tool on an annual basis is needed to better understand and act on EMPACT-SPC's clients Social Determinants of Health (SDOH). EMPACT-SPC does not currently utilize a HRSN on a consistent basis. The purpose of this project is to increase the percentage of completed PRAPARE screenings to at least 85% of clients seen by EMPACT-SPC between October 1, 2024, and March 31, 2025."
           score: "1"
@@ -30,7 +30,7 @@ sections:
           Process 1: Read given project proposal’s project description section.
           Process 2: Determine if the project includes a purpose statement. This can be: 
             - Direct: A clear sentence stating the purpose (e.g., "The purpose of this project is..." or "This project is to...")
-            - Indirect: Goals, objectives, or scope statements that impy the purpose of the project.
+            - Indirect: Goals, objectives, or scope statements that imply the purpose of the project.
           Process 3: Assign scores based on the following criteria:
             - 1: If the purpose is explicitly stated or implied through goals or objectives or scope.
             - 0: If no purpose statement is present, and goals, objectives, or scope do not provide enough context to infer the purpose.
