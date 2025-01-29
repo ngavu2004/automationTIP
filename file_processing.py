@@ -41,11 +41,11 @@ def read_pdf_text(pdfPath: str, is_rubric_path=False):
         pdfText = camelot_text
 
         # Save results to txt file
-        with open(f"{output_folder}/Debug/{fileName}_stream.txt", "w") as file:
+        with open(f"{output_folder}/Debug/{fileName}_stream.txt", "w", encoding="utf-8") as file:
             file.write(pdfText)
     else:
         # Read already saved results
-        with open(f"{output_folder}/Debug/{fileName}_stream.txt", "r") as file:
+        with open(f"{output_folder}/Debug/{fileName}_stream.txt", "r", encoding="utf-8") as file:
             pdfText = file.read()
 
     return pdfText
@@ -76,11 +76,11 @@ def convert_docx_to_pdf(docxPath: str, is_rubric_path=False):
             pdfText = read_pdf_text(local_pdf_path, is_rubric_path=is_rubric_path)
 
             # Save the extracted text to a .txt file
-            with open(f"{output_folder}/Debug/{fileName}_stream.txt", "w") as file:
+            with open(f"{output_folder}/Debug/{fileName}_stream.txt", "w", encoding="utf-8") as file:
                 file.write(pdfText)
         else:
             # If the txt file already exists, just read it
-            with open(f"{output_folder}/Debug/{fileName}_stream.txt", "r") as file:
+            with open(f"{output_folder}/Debug/{fileName}_stream.txt", "r", encoding="utf-8") as file:
                 pdfText = file.read()
 
         # Return the extracted text and the converted PDF path
@@ -190,7 +190,7 @@ def extract_lattice_section(file_path):
         base_name = os.path.basename(file_path).replace(".pdf", "_lattice.txt")
         lattice_output_path = os.path.join(output_folder + "/Debug", base_name)
 
-        with open(lattice_output_path, "w") as lattice_file:
+        with open(lattice_output_path, "w", encoding="utf-8") as lattice_file:
             lattice_file.write(extracted_text)
 
         print(f"[INFO] Lattice section saved to {lattice_output_path}")
@@ -202,7 +202,7 @@ def extract_lattice_section(file_path):
 
 def extract_section_from_lattice(lattice_file, start_keyword):
     try:
-        with open(lattice_file, "r") as file:
+        with open(lattice_file, "r", encoding="utf-8") as file:
             content = file.readlines()  # Read file line by line
 
         # Find the start of the section
@@ -234,7 +234,7 @@ def extract_section_from_lattice(lattice_file, start_keyword):
         base_name = os.path.basename(lattice_file).replace("_lattice.txt", "_lattice_extracted.txt")
         output_extracted_file = os.path.join(output_folder, base_name)
 
-        with open(output_extracted_file, "w") as extracted_file:
+        with open(output_extracted_file, "w", encoding="utf-8") as extracted_file:
             extracted_file.write(extracted_text)
 
         print(f"[INFO] Extracted section saved to {output_extracted_file}")
@@ -247,10 +247,10 @@ def extract_section_from_lattice(lattice_file, start_keyword):
 # Replace "Project Overview" section in stream file
 def replace_stream_content(stream_file, extracted_file, output_file):
     try:
-        with open(stream_file, "r") as stream:
+        with open(stream_file, "r", encoding="utf-8") as stream:
             stream_content = stream.read()
 
-        with open(extracted_file, "r") as extracted:
+        with open(extracted_file, "r", encoding="utf-8") as extracted:
             extracted_content = extracted.read()
 
         # Find and replace "Project Overview" section
@@ -270,7 +270,7 @@ def replace_stream_content(stream_file, extracted_file, output_file):
         output_folder = "Documents/AlreadyRead"
         final_file_path = os.path.join(output_folder, os.path.basename(output_file))
 
-        with open(final_file_path, "w") as final_file:
+        with open(final_file_path, "w", encoding="utf-8") as final_file:
             final_file.write(updated_content)
 
         print(f"[INFO] Final file saved to {final_file_path}")
@@ -303,7 +303,7 @@ def process_pdf_with_combined_modes(input_file):
         lattice_output_path = extract_lattice_section(input_file)  # Extract using lattice
         if lattice_output_path and os.path.exists(lattice_output_path):
             print(f"[INFO] Lattice file found: {lattice_output_path}")
-            with open(lattice_output_path, "r") as lattice_file:
+            with open(lattice_output_path, "r", encoding="utf-8") as lattice_file:
                 lattice_text = lattice_file.read()
             save_debug_text(input_file, lattice_text, "lattice")
         else:
@@ -331,5 +331,5 @@ def save_debug_text(file_path, content, suffix):
     output_folder = "Documents/AlreadyRead/Debug"
     file_name = os.path.basename(file_path).replace(".pdf", f"_{suffix}.txt")
 
-    with open(os.path.join(output_folder, file_name), "w") as file:
+    with open(os.path.join(output_folder, file_name), "w", encoding="utf-8") as file:
         file.write(content)
