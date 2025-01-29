@@ -9,14 +9,19 @@ common_prompt:
     3. Respond **only** with JSON format.
 
 sections:
-  Project Description / Purpose:
+  Project Description:
     criteria:
+<<<<<<< HEAD
       - name: "Question 6. Does the Project Description / Purpose includes a brief description of the project?"
         extra instructions: |
           Process 1: Read given project proposal's project description part.
+=======
+      - name: "Question 1. Does the 'Project Description / Purpose' include a brief description of the project?"
+        extra instructions: |
+          Process 1: Read given project proposal’s project description section.
+>>>>>>> 6e83e5ef155ae45e42a51a3165b462da41dca6de
           Process 2: Determine if the project description describes the background of the project or what will the project do.
           Process 3: If it describes the project clearly, assign a score of 1. If the description was not provided or too short (less than 2 sentences) , assign a score of 0.
-          Process 4: Provide the detail reasons of the score assignment.
         example1:
           input: "Screening clients for Health-Related Social Needs (HRSN) using an evidenced based screening tool on an annual basis is needed to better understand and act on EMPACT-SPC's clients Social Determinants of Health (SDOH). EMPACT-SPC does not currently utilize a HRSN on a consistent basis. The purpose of this project is to increase the percentage of completed PRAPARE screenings to at least 85% of clients seen by EMPACT-SPC between October 1, 2024, and March 31, 2025."
           score: "1"
@@ -26,11 +31,15 @@ sections:
           score: "0"
           explanation: "Brief description of the project is not found"
 
-      - name: "Question 7. Does the Project Description / Purpose includes a sentence explicitly stating the purpose of the project that starts with phrases like 'The purpose of this project is to implement a ...'"
+      - name: "Question 2. Does the 'Project Description / Purpose' include a sentence stating the purpose of the project?"
         extra instructions: |
-          Process 1: Read given project proposal's project description part.
-          Process 2: Determine if the project includes a clear and explicit purpose statement (e.g., phrases like "The purpose of this project is..." or "This project is to...").
-          Process 3: If it includes the project purpose clearly, assign a score of 1. If the purpose is vague or not explicitly stated, assign a score of 0.
+          Process 1: Read given project proposal’s project description section.
+          Process 2: Determine if the project includes a purpose statement. This can be: 
+            - Direct: A clear sentence stating the purpose (e.g., "The purpose of this project is..." or "This project is to...")
+            - Indirect: Goals, objectives, or scope statements that impy the purpose of the project.
+          Process 3: Assign scores based on the following criteria:
+            - 1: If the purpose is explicitly stated or implied through goals or objectives or scope.
+            - 0: If no purpose statement is present, and goals, objectives, or scope do not provide enough context to infer the purpose.
           Process 4: Provide the detail reasons of the score assignment.
         example1:
           input: "Screening clients for Health-Related Social Needs (HRSN) using an evidenced based screening tool on an annual basis is needed to better understand and act on EMPACT-SPC's clients Social Determinants of Health (SDOH).  EMPACT-SPC does not currently utilize a HRSN on a consistent basis.  The purpose of this project is to increase the percentage of completed PRAPARE screenings to at least 85% of clients seen by EMPACT-SPC between October 1, 2024, and March 31, 2025."
@@ -49,11 +58,11 @@ sections:
           score: "0"
           explanation: "I do not see enough detail about the project purpose statement."
 
-      - name: "Question 8. Does the Project Description / Purpose includes a expected results from the project?"
+      - name: "Question 3. Does the 'Project Description / Purpose' include expected results from the project?"
         extra instructions: |
-          Process 1: Read given project proposal's project description part.
-          Process 2: Determine if the project includes an expected result for the project.
-          Process 3: If it includes the project result, assign a score of 1. If the result is vague or not explicitly stated, assign a score of 0.
+          Process 1: Read given project proposal's project description section.
+          Process 2: Evaluate whether it outlines the anticipated outcomes, objectives, or key improvements, even if they are not directly labeled as expected results.
+          Process 3: If it includes the project result, assign a score of 1. If the result is not stated, assign a score of 0.
           Process 4: Provide the detail reasons of the score assignment.
         example1:
           input: "This project will seek to improve processes within Spectrum Healthcare Group (SHG) pertaining to the screening of Health-Related Social Needs, with specific emphasis on improving efficiency, improving screening capture rates, decreasing variation among populations and locations. Process improvement will also specifically target members' connection to individualized social interventions"
@@ -62,8 +71,4 @@ sections:
         example2:
           input: "Fluoride varnish application is used to prevent tooth decay and strengthen tooth enamel. The purpose of this project is to reduce dental caries and to promote oral health. We anticipate that our patients will have improved engagement with their Dental Home and improved oral health."
           score: "1"
-          explanation: "Expected result found: 'to reduce dental caries and to promote oral health. We anticipate that our patients will have improved engagement with their Dental Home and improved oral health.' "
-        example3:
-          input: "The project will identify needs."
-          score: "0"
-          explanation: "The expected result is too vague, need more clarification on what it will do."
+          explanation: "Expected result found: 'to reduce dental cares and to promote oral health. We anticipate that our patients will have improved engagement with their Dental Home and improved oral health.' "

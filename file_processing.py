@@ -4,7 +4,7 @@ import camelot
 from docx2pdf import convert
 
 # Can be changed according to the input files (List of keywords need to be the header of the chunk)
-line_break_keywords = ["Project Overview", "Timeline", "Project Scope", "Project Team", "Signatures"]
+line_break_keywords = ["Project Description / Purpose", "Project Overview", "Timeline", "Project Scope", "Project Team", "Signatures"]
 
 
 # Ensure directories exist
@@ -91,12 +91,6 @@ def convert_docx_to_pdf(docxPath: str, is_rubric_path=False):
         return None, None  # Return None if an error occurs
 
 
-# Process the entire text with bullet point formatting
-def process_text(text):
-    text = format_bullet_points(text)   # Handle bullet points
-    return text
-
-
 # Bullet point handling and line break management
 def format_bullet_points(text):
     special_bullets = ["●", "•", "■", "○", "◆", "-"]  # Bullet point symbols
@@ -178,7 +172,7 @@ def extract_data(file_path):
         formatted_data += "\n\n"
 
     # Apply bullet point formatting globally
-    formatted_data = process_text(formatted_data)
+    formatted_data = format_bullet_points(formatted_data)
     return formatted_data
 
 

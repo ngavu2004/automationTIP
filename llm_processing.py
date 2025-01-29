@@ -12,7 +12,7 @@ from langchain.chains.question_answering import load_qa_chain
 
 
 output_dir = "chunk"
-rubric_file = "Prompts/Rubric_Overview.yaml" # Change file as you want
+rubric_file = "Prompts/Rubric.yaml" # Change file as you want
 
 load_dotenv()
 
@@ -41,66 +41,64 @@ def split_text_by_parts(text: str, output_dir: str):
     chunks = {}
     current_part = None
     buffer = []
-    title_processed = set()
+    # title_processed = {}
+    project_desc_indices = []
 
     # Normalize text (strip leading/trailing spaces and replace newlines)
     normalized_lines = [line.strip() for line in text.splitlines()]
 
-    def match_title_with_whitespace_variations(line, title):
-        # Create regex pattern to handle multiple spaces or tabs between words
-        regex_title = r"\s*".join(re.escape(word) for word in title.split())
-        return re.match(fr"^{regex_title}[:\s\t]*$", line)
+    def match_title_with_variations(line, title):
+        # # Create regex pattern to handle multiple spaces or tabs between words
+        # regex_title = r"\s*".join(re.escape(word) for word in title.split())
+        # return re.match(fr"^{regex_title}[:\s\t]*$", line)
+        
+        # Create regex pattern to handle any sequence of spaces or tabs between words
+        regex_title = r"[ \t]*".join(re.escape(word) for word in title.split())
+        return re.match(fr"^{regex_title}[ \t]*[:\s\t]*$", line)
     
-    # Normalize the title for consistent file naming and matching
-    def normalize_title(title):
-        return title.replace("/", "_").strip()
+    # # Normalize the title for consistent file naming and matching
+    # def normalize_title(title, suffix=""):
+    #     if title == "Project Description / Purpose":
+    #         filename = f"{'Process Milestone' if suffix == 'first' else 'Project Description'}"
+    #     else:
+    #         filename = title.replace("/", "_").strip()
+    #     return filename + ".txt"
 
-    # Add content before the first title to the first title's file
-    first_title_found = False
-    first_title = part_titles[0]
+    # Find position for Project Description / Purpose
+    for i, line in enumerate(normalized_lines):
+        if match_title_with_variations(line, "Project Description / Purpose"):
+            project_desc_indices.append(i)
+
+    if len(project_desc_indices) == 2:
+        first_start, second_start = project_desc_indices
+        chunks["Process Milestone"] = "\n".join(normalized_lines[first_start + 1: second_start])
+        chunks["Project Description"] = "\n".join(normalized_lines[second_start + 1:])
+    elif len(project_desc_indices) == 1:
+        second_start = project_desc_indices[0]
+        chunks["Process Milestone"] = "\n".join(normalized_lines[:second_start])
+        chunks["Project Description"] = "\n".join(normalized_lines[second_start + 1:])
 
     # for line in text.splitlines():
     for line in normalized_lines:
         stripped_line = line.strip()
 
         # Detect part titles (match titles even with varying spaces or tabs)
-        matched_title = next((title for title in part_titles if match_title_with_whitespace_variations(stripped_line, title)), None)
-        if matched_title and matched_title not in title_processed:
+        matched_title = next((title for title in part_titles if title != "Project Description / Purpose" and match_title_with_variations(stripped_line, title)), None)
+
+        if matched_title:
             if current_part:
-                # Use normalized title for consistent file naming
-                safe_part_name = normalize_title(current_part)
-                chunks[current_part] = "\n".join(buffer)  # Save the content of the previous part
-                # Save the chunk to a txt file
-                with open(os.path.join(output_dir, f"{safe_part_name}.txt"), "w") as f:
-                    f.write(chunks[current_part])
-
-            current_part = matched_title  # Set the new part
-            buffer = []  # Reset the buffer for the new part
-            title_processed.add(matched_title)
-
-            # Handle content before the first title
-            if not first_title_found and matched_title == first_title:
-                first_title_found = True
-                chunks[first_title] = "\n".join(buffer)  # Save the buffer as the first title's content
-                with open(os.path.join(output_dir, f"{normalize_title(first_title)}.txt"), "w") as f:
-                    f.write(chunks[first_title])
-
-                # Clear the buffer for subsequent parts
-                buffer = []
-
-        elif current_part:  # Continue accumulating lines for the current part
+                chunks[current_part] = "\n".join(buffer)
+            current_part = matched_title
+            buffer = []
+        elif current_part:
             buffer.append(line)
 
-    if current_part:  # Save the last part
-        safe_part_name = normalize_title(current_part)
+    if current_part:
         chunks[current_part] = "\n".join(buffer)
-        # Save the last chunk to a txt file (Debug)
-        with open(os.path.join(output_dir, f"{safe_part_name}.txt"), "w") as f:
-            f.write(chunks[current_part])
 
-    # Debugging
-    if not chunks:
-        print("[ERROR] No sections were found in the document.")
+    for part_name, content in chunks.items():
+        with open(os.path.join(output_dir, f"{part_name.replace('/', '_')}.txt"), "w") as f:
+            f.write(content)
 
     return chunks
 
@@ -149,6 +147,7 @@ def generate_prompt(rubric: dict, part_name: str, question: dict, input_text: st
             "{question['name']}": {{"score": "", "explanation": ""}}
         }}
     }}
+    The score must either 0 or 1.
     """)
     
     return prompt_template.substitute(
@@ -181,9 +180,9 @@ def evaluate_section_by_questions(text: str, rubric: dict, part_name: str, chain
     section = rubric.get("sections", {}).get(part_name, {})
     criteria = section.get("criteria", [])
 
-    # If Project Scope sectioin, add Project Description / Purpose chunk
-    if part_name == "Project Scope" and "Project Description / Purpose" in all_parts:
-        combined_text = f"Project Description / Purpose:\n{all_parts['Project Description / Purpose']}\n\n" \
+    # If Project Scope sectioin, add Project Description chunk
+    if part_name == "Project Scope" and "Project Description" in all_parts:
+        combined_text = f"Project Description:\n{all_parts['Project Description']}\n\n" \
                         f"{part_name}:\n{text}"
     else:
         combined_text = text
@@ -284,8 +283,12 @@ def evaluate_document_with_prompt(text: str):
     llm = ChatOllama(model="llama3", temperature=0)
     chain = load_qa_chain(llm=llm)
 
-    for part_name, part_text in parts.items():
+    # for part_name, part_text in parts.items():
+    for file_name, part_text in parts.items():
+        part_name = file_name.replace(".txt", "")
+
         print(f"Evaluating part '{part_name}' by questions...")
+
         part_result = evaluate_section_by_questions(part_text, rubric, part_name, chain, parts)
         if part_result:
             results.update(part_result)

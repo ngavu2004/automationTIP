@@ -1,60 +1,175 @@
-Project Description / Purpose:
-  criteria:
-      - name: "Question 1. Is there a valid value for 'Project Name:' in the input?"
-        grade_range: "0-1"
-      - name: "Question 2. Is there a valid value for 'Clinic:' in the input?"
-        grade_range: "0-1"
-      - name: "Question 3. Is there a valid value for 'Process:' in the input?"
-        grade_range: "0-1"
-      - name: "Question 4. Is there a valid value for 'TIP 2.0 Process Milestone:' in the input?"
-        grade_range: "0-1"
-      - name: "Question 5. Is there a specific value for 'TIP 2.0 Process Milestone:' that details the project milestone?"
-        grade_range: "0-1"
-      - name: "Question 6. Is there a valid value for 'Project Description / Purpose' that includes a brief description of the project?"
-        grade_range: "0-1"
-      - name: "Question 7. Is there a valid value for 'Project Description / Purpose' that includes a sentence explicitly stating the purpose of the project?"
-        grade_range: "0-1"
-      - name: "Question 8. Is there a valid value for 'Project Description / Purpose' that includes detailed expected results from the project?"
-        grade_range: "0-1"
+common_prompt:
+  introduction: |
+    You are an automated project grader tasked with evaluating a project proposal. Based on the provided description, assign a binary score (0 or 1) following the evaluation process and examples.
+  instructions: |
+    1. Assign a score of 0 or 1 based on the criteria.
+    2. Provide a short explanation for your score.
+        - If the score is 0, explain what was missing or unclear.
+        - If the score is 1, explain what was correctly included.
+    3. Respond **only** with JSON format.
 
-Project Overview:
-  criteria:
-    - name: "Question 1. Does the value of the 'Problem Summary:' attribute include a detailed (at least 1 sentence) and logical problem statement?"
-      grade_range: "0-9"
-    - name: "Question 2. Does the value of the 'Desired Outcome(s):' attribute include a at least 1 sentence explicitly talking about the expected results/desired outcomes?"
-      grade_range: "0-8"
-    - name: "Question 3. Does the value of the 'Benefits:' attribute include a detailed (at least 1 sentence) explicitly talking about the benefits of this project?"
-      grade_range: "0-8"
+sections:
+  Project Description:
+    criteria:
+      - name: "Question 1. Does the 'Project Description / Purpose' include a brief description of the project?"
+        extra instructions: |
+          Process 1: Read given project proposal’s project description section.
+          Process 2: Determine if the project description describes the background of the project or what will the project do.
+          Process 3: If it describes the project clearly, assign a score of 1. If the description was not provided or too short (less than 2 sentences), assign a score of 0.
+        example1:
+          input: "Screening clients for Health-Related Social Needs (HRSN) using an evidenced based screening tool on an annual basis is needed to better understand and act on EMPACT-SPC's clients Social Determinants of Health (SDOH). EMPACT-SPC does not currently utilize a HRSN on a consistent basis. The purpose of this project is to increase the percentage of completed PRAPARE screenings to at least 85% of clients seen by EMPACT-SPC between October 1, 2024, and March 31, 2025."
+          score: "1"
+          explanation: "Brief description of the project found: 'The purpose of this project is to increase the percentage of completed PRAPARE screenings to at least 85% of clients seen by EMPACT-SPC between October 1, 2024, and March 31, 2025."
+        example2:
+          input: "This new referral process will help us create better communication between the patients and ensure they are receiving proper care"
+          score: "0"
+          explanation: "Brief description of the project is not found"
 
-Timeline:
-  criteria:
-    - name: "Question 1. Does the task list contain a comprehensive set of key tasks? (Evaluate all tasks together)"
-      grade_range: "0-10"
-    - name: "Question 2. Does the task list contain specific planned completion due dates for each task? (Evaluate all tasks together)"
-      grade_range: "0-10"
+      - name: "Question 2. Does the 'Project Description / Purpose' include a sentence stating the purpose of the project?"
+        extra instructions: |
+          Process 1: Read given project proposal’s project description section.
+          Process 2: Determine if the project includes a purpose statement. This can be: 
+            - Direct: A clear sentence stating the purpose (e.g., "The purpose of this project is..." or "This project is to...")
+            - Indirect: Goals, objectives, or scope statements that imply the purpose of the project.
+          Process 3: Assign scores based on the following criteria:
+            - 1: If the purpose is explicitly stated or implied through goals or objectives or scope.
+            - 0: If no purpose statement is present, and goals, objectives, or scope do not provide enough context to infer the purpose.
+          Process 4: Provide the detail reasons of the score assignment.
+        example1:
+          input: "Screening clients for Health-Related Social Needs (HRSN) using an evidenced based screening tool on an annual basis is needed to better understand and act on EMPACT-SPC's clients Social Determinants of Health (SDOH).  EMPACT-SPC does not currently utilize a HRSN on a consistent basis.  The purpose of this project is to increase the percentage of completed PRAPARE screenings to at least 85% of clients seen by EMPACT-SPC between October 1, 2024, and March 31, 2025."
+          score: "1"
+          explanation: "Explicit purpose found: 'The purpose of this project is to increase the percentage of completed PRAPARE screenings to at least 85% of clients seen by EMPACT-SPC between October 1, 2024, and March 31, 2025."
+        example2:
+          input: "The purpose of this project is to train staff on the purpose of the Health Leads Social Needs Screening, ensure accurate screening of clients and families, assignment a corresponding Z and G code, and provide internal or external resources to our clients. Currently we are screening 100% of clients that receive a clinical intake, but less than 5% show a Yes on Health Leads Social Needs Screening. From our internal audits, we show 94% of adults having a Z code on their assessment. We're hoping through this project to see an increase to 50% of clinical intakes to show a Yes on the Health Leads Social Needs Screening."
+          score: "1"
+          explanation: "Explicit purpose found: 'The purpose of this project is to train staff on the purpose of the Health Leads Social Needs Screening, ensure accurate screening of clients and families.'"
+        example3:
+          input: "Screening members for health-related social needs has been recognized as a critical step for identifying needs of the members and allow us to build community networks to address such needs. Once member needs have been identified The Guidance Center begins the closed loop process of referrals, both inter-agency as well as our community partners to assist in meeting the social needs of our members"
+          score: "0"
+          explanation: "No explicit purpose statement found. Activities are mentioned, but the goal is not defined."
+        example4:
+          input: "Addressing social and economic needs for our members and families to fulfill their needs and maintain their health and well-being."
+          score: "0"
+          explanation: "I do not see enough detail about the project purpose statement."
 
-Project Scope:
-  criteria:
-    - name: "Question 1. Does the value of the 'In Scope Project Objectives' attribute include an aligned objectives with the project purpose?"
-      grade_range: "0-8"
-    - name: "Question 2. Does the value of the 'Out of Scope Project Objectives or Activities' attribute include an aligned objectives with the project purpose?"
-      grade_range: "0-7"
+      - name: "Question 3. Does the 'Project Description / Purpose' include expected results from the project?"
+        extra instructions: |
+          Process 1: Read given project proposal's project description section.
+          Process 2: Evaluate whether it outlines the anticipated outcomes, objectives, or key improvements, even if they are not directly labeled as expected results.
+          Process 3: If it includes the project result, assign a score of 1. If the result is not stated, assign a score of 0.
+          Process 4: Provide the detail reasons of the score assignment.
+        example1:
+          input: "This project will seek to improve processes within Spectrum Healthcare Group (SHG) pertaining to the screening of Health-Related Social Needs, with specific emphasis on improving efficiency, improving screening capture rates, decreasing variation among populations and locations. Process improvement will also specifically target members' connection to individualized social interventions"
+          score: "1"
+          explanation: "Expected results found: 'improving efficiency', 'improving screening capture rates', and 'decreasing variation among populations and locations'."
+        example2:
+          input: "Fluoride varnish application is used to prevent tooth decay and strengthen tooth enamel. The purpose of this project is to reduce dental caries and to promote oral health. We anticipate that our patients will have improved engagement with their Dental Home and improved oral health."
+          score: "1"
+          explanation: "Expected result found: 'to reduce dental cares and to promote oral health. We anticipate that our patients will have improved engagement with their Dental Home and improved oral health.' "
 
-Project Team:
-  criteria:
-    - name: "Question 1. Does the value of the 'Team Lead:' attribute contain an individual's name? (Do not grade the generic title's presence)"
-      grade_range: "0-2"
-    - name: "Question 2. Does the value of the 'Project Champion:' attribute contain an individual's name? (Do not grade the generic title's presence)"
-      grade_range: "0-2"
-    - name: "Question 3. Does the value of the 'Process Owner:' attribute contain an individual's name? (Do not grade the generic title's presence)"
-      grade_range: "0-2"
-    - name: "Question 4. Does the value of the 'Process Manager:' attribute contain an individual's name? (Do not grade the generic title's presence)"
-      grade_range: "0-2"
-    - name: "Question 5. Does the value of the 'Stakeholders' stakeholder attribute contain an individual's name? (Do not grade the attribute name's presence)"
-      grade_range: "0-2"
-    - name: "Question 6. Does the the value of the 'Stakeholders' Stakeholder, Title, Department, and Organization attribute contain values? (Do not grade the attribute name's presence)"
-      grade_range: "0-2"
-    - name: "Question 7. Does the value of the 'Project Team Members' Name attribute contain an individual's name? (Do not grade the attribute name's presence)"
-      grade_range: "0-2"
-    - name: "Question 8. Do the 'Project Team Members' contain values for the 'Team role' attribute? (Do not grade the attribute name's presence)"
-      grade_range: "0-1"
+  Project Overview:
+    criteria:
+      - name: "Question 1. Does the 'Problem Summary' clearly state the current issue or gap the project aims to address?"
+        extra instructions: |
+          Process 1: Check if the 'Problem Summary' section describes the current challenges or gaps that necessitate this project.
+          Process 2: Assign a score of 1 if the 'Problem Summary':
+            - Clearly identifies a problem or gap relevant to the project's purpose.
+            - Explains the significance of the issue and how it relates to the goals of the project.  
+          Process 3: Assign a score of 0 if the 'Problem Summary':
+            - Fails to clearly identify a problem or gap.
+            - Is overly vague, generic, or provides insufficient detail to understand the context or necessity of the project.
+          Process 4: Provide a brief explanation for the score.
+        example1:
+          input: "Many patients visiting family practice clinics face health challenges influenced by social determinants, such as inadequate housing, food insecurity, lack of transportation, and financial instability. These health-related social needs (HRSNs) often go unidentified and unaddressed during routine medical visits, leading to exacerbated health disparities and increased healthcare costs."
+          score: "1"
+          explanation: "The statement describes a logical problem statement and provides appropriate examples"
+
+      - name: "Question 2. Does the 'Desired Outcome(s)' clearly state achievable goals for the project?"
+        extra instructions: |
+          Process 1: Review the provided 'Desired Outcomes(s)’ and determine whether it aligns with the issues identified in the 'Problem Summary'.
+          Process 2: Check if the outcomes are:
+            - **Achievable**: The statement should describe goals that are realistic and feasible within the project's scope, resources, and timeline. It should provide enough context to demonstrate how the outcomes address the identified problem.
+          Process 3: Assign a score of 1 if the outcomes:
+            - Clearly state achievable goals that address the issues outlined in the 'Problem Summary'
+            - Provide sufficient context to explain why the goals are feasible.
+          Process 4: Assign a score of 0 if the outcomes:
+            - Are overly vague or generic (e.g., "improve outcomes" without explaining how it will be done).
+            - Do not specify achievable goals or fail to align with the 'Problem Summary'
+          Process 5: Provide a brief explanation for the score.
+        example1:
+          input: "The Guidance Center’s desired outcome is to screen 85% of our members using the PRAPARE tool, and track services provided of 50% of our member indicative to PRAPARE screening results."
+          score: "1"
+          explanation:  "The outcome is achievable as it focuses on using an existing tool (PRAPARE) and outlines a clear process (screening and service provision)."
+        example2:
+          input: "Increase the number of patients screened for HRSN and referred to CBO’s."
+          score: "1"
+          explanation: "The outcome is realistic and aligns with addressing the HRSN gap."
+        example3:
+          input: "Ensuring all patients health needs and social determinants are met"
+          score: "0"
+          explanation: "The outcome is vague and does not explain how it will be achieved or what actions will be taken."
+
+      - name: "Question 3. Does the 'Benefits' state the advantages or improvements the project will deliver?"
+        extra instructions: |
+          Process 1: If the specific section (Problem Summary, Desired Outcomes, Benefits) appears to be missing or unclear due to formatting issues:
+            - Identify the section title (Problem Summary, Desired Outcomes, Benefits) and extract the surrounding text above and below the title.
+            - If the surrounding text provides relevant context, use it to evaluate the section.
+            - If no relevant content is found in the surrounding text or other sections, explain that the section is missing due to formatting issues.
+          Process 2: Evaluate the 'Benefits' section, including:
+            - Text directly below the "Benefits:" title.
+            - If the "Benefits:" section is missing or empty, evaluate text below "Desired Outcomes" for relevant content.
+          Process 3: Evaluate the 'Benefits' using the following criteria:
+            - Relevant: Align with the project's goals and address the identified gaps.
+            - Feasible: Provide a logical improvement or advantage, even if they are generic.
+          Process 4: Assign a score of 1 if the 'Benefits' are relevant, and feasible, even if they are generic.
+          Process 5: Assign a score of 0 if the 'Benefits' are generic or fail to align with the project's objectives.
+          Process 6: The score should be binary only 0 or 1.
+        example1:
+          input: "The success of this project will meet the diverse needs of our underserved patients, leading to lower healthcare expenses through improved patient adherence and reduced use of high-cost and otherwise unnecessary services"
+          score: "1"
+          explanation: "The benefits are specific (lower healthcare expenses, improved adherence) and relevant to the project's goals."
+        example2:
+          input: "The success of this project will increase our chance for identifying parents and caregivers with PeriPartum depression and/or anxiety at an early stage, allowing for referral of those individuals to our integrated behavioral health, and/or external resources."
+          score: "1"
+          explanation: "The benefits are specific (early identification and referral) and aligned with improving access to mental health resources."
+        example3:
+          input: "To ensure patients with positive/negative screens are being recognized by both the practice and the health plans "
+          score: "0"
+          explanation: "The benefits are vague and do not explain what specific advantages or improvements will result from the project."
+
+  Project Scope:
+    criteria:
+      - name: "Question 1. Does the 'In Scope Project Objectives' clearly state the project's objectives?"
+        extra instructions: |
+          Process 1: Review the ‘Project Description / Purpose’ section and check if the objectives match the project’s main goals or deliverables.
+          Process 2: The objectives should directly reflect the project's purpose as described in the ‘Project Description / Purpose’ section.
+          Process 3: Assign a score of 1 if the objectives are clear and aligned. Assign 0 if they are vague, missing, or unrelated.
+          Process 4: Provide a brief explanation for the score.
+        example1:
+          input: "The project's main objective is to identify social needs presenting as barriers to reaching the participant's mental and physical health goals and linking participants with resources to remove the identified barriers."
+          score: "1"
+          explanation: "The statement describes the main objective of the project aligned with the project's main focus, goals or intended deliverables"
+        example2:
+          input: "The primary objective of this project is to use quality improvement strategies to improve the completed screening rates and completed community referrals for client health-related social needs."
+          score: "1"
+          explanation: "The statement describes the main objectives of the project by describing 'The primary objective of this project is to ...'"
+
+      - name: "Question 2. Does the 'Out of Scope Project Objectives or Activities' state what is outside the project's focus?"
+        extra instructions: |
+          Process 1: Check if the 'Out-of-Scope' section describes tasks or goals that are not the main focus of the project. The section may include specific exclusions or general limitations.
+          Process 2: The 'Out-of-Scope' section does not need to explicitly list every excluded task. General statements that indicate a broader exclusion are acceptable.
+          Process 3: Assign a score of 1 if the 'Out-of-Scope' section provides a clear boundary of what the project will not cover, even if it is a general statement. The boundary must clearly indicate tasks or goals that are excluded from the project's main focus. Assign 0 if the section is missing, marked as "N/A", or contains vague statements without any specific exclusions.  
+          Process 4: If the 'Out-of-Scope' section includes a statement indicating that exclusions will be identified through future evaluation or project progress, assign a score of 1 **only if the statement is accompanied by a clear intention to exclude certain tasks or goals**. If the section lacks any clear exclusion or remains completely open-ended, assign a score of 0.
+          Process 5: Provide a brief explanation for the score.
+        example1:
+          input: "We are not addressing any problems related to community referral system CommunityCares, introducing any new screening protocol, hiring any new staff, or making any other major changes to the current protocol."
+          score: "1"
+          explanation: "The statement explicitly excludes activities that are not part of the project's main focus or deliverables"
+        example2:
+          input: "Alium Health & Wellness has limitations to the resources that can be offered to participants; therefore, referrals will be needed in some cases."
+          score: "0"
+          explanation: "The statement about resource limitations and referrals is too closely aligned with in-scope objectives. It should represent activities that are explicitly excluded from the project's scope"
+        example3:
+          input: "At this time we are not identifying any objectives outside the scope of the project, and this may change if process improvement is not seen, leading to additional root cause analysis and other concerns."
+          score: "1"
+          explanation: "Although no specific out-of-scope tasks are listed, the statement clearly outlines a future possibility of identifying out-of-scope activities if further analysis is required. This provides a general boundary for what may fall outside the project’s current scope."
