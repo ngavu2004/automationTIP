@@ -3,7 +3,7 @@ import pandas as pd
 import csv   # Added to write the result to a csv file
 from dotenv import load_dotenv
 from Helper.logging import langsmith
-from file_processing import check_directory, read_pdf_text, convert_docx_to_pdf
+from file_processing import check_directory, read_pdf_text, convert_docx_to_pdf, process_pdf_with_combined_modes
 from llm_processing import evaluate_document_with_prompt, load_rubric, rubric_file
 
 # Load environment settings
@@ -23,12 +23,7 @@ def generate_grades():
 
     check_directory()
 
-    # # Take the file list of each folder
-    # fileNamesWithExtension = os.listdir("Documents/NewlyUploaded/")
-    # rubricFileNamesWithExtension = os.listdir("Documents/NewlyUploaded/Rubric/")
-
     # Load the rubric from YAML
-    # rubric_file = "Prompts/Rubric_Scope.yaml" # Change file as you want
     rubric = load_rubric(rubric_file)
 
     # Dynamically extract all sections
@@ -48,54 +43,60 @@ def generate_grades():
 
     # Process documents to be graded
     for fileNameWithExtension in fileNamesWithExtension:
-        # print(f"[DEBUG] Processing file: {fileNameWithExtension}")
+        fileContent = None
         if fileNameWithExtension in processed_files:
-            # print(f"[DEBUG] Skipping already processed file: {fileNameWithExtension}")
             continue
 
         # Extract file extension to differentiate between PDF and DOCX
         target_fileName, extension = os.path.splitext(fileNameWithExtension)
         extension = extension.lower()  # Normalize the extension to lowercase
+        input_file_path = os.path.join("Documents/NewlyUploaded", fileNameWithExtension)
 
-        # Read PDF content
+        # Read .pdf content
         if extension == ".pdf":
             print("Processing PDF file:", fileNameWithExtension)
-            fileContent = read_pdf_text("Documents/NewlyUploaded/" + fileNameWithExtension)
+            
+            # Step 1: Extract text from PDF
+            fileContent = read_pdf_text(input_file_path)
+            if not fileContent:
+                print(f"[ERROR] Failed to extract text from PDF: {fileNameWithExtension}")
+                continue
 
-        # Read DOCX content
+            # Step 2: Process PDF using combined modes
+            final_output = process_pdf_with_combined_modes(input_file_path)
+            if not final_output:
+                print(f"[ERROR] Failed to process PDF: {fileNameWithExtension}")
+                continue
+
+        # Read .docx content
         elif extension == ".docx":
             print("Processing docx file:", fileNameWithExtension)
-            docxPath = "Documents/NewlyUploaded/" + fileNameWithExtension
-            fileContent = convert_docx_to_pdf(docxPath)
+
+            # Convert DOCX to PDF and get the converted PDF path
+            fileContent, pdf_path = convert_docx_to_pdf(input_file_path)
+            if not fileContent or not pdf_path or not os.path.exists(pdf_path):
+                print(f"[ERROR] Failed to process DOCX: {fileNameWithExtension}")
+                continue
+
+            # Process the converted PDF
+            final_output = process_pdf_with_combined_modes(pdf_path)
+            if not final_output or not os.path.exists(final_output):
+                print(f"[ERROR] Failed to process converted PDF for DOCX: {fileNameWithExtension}")
+                continue
 
         # Skip unsupported file formats
         else:
+            print(f"[WARNING] Unsupported file format: {fileNameWithExtension}")
             continue
-
-    # # Process rubric documents
-    # for rubricFileNameWithExtension in rubricFileNamesWithExtension:
-    #     rubric_fileName, extension = os.path.splitext(rubricFileNameWithExtension)
-    #     extension = extension.lower()
-
-    #     # Read PDF content
-    #     if extension == ".pdf":
-    #         print("Processing Rubric PDF file:", rubricFileNameWithExtension)
-    #         rubricContent = read_pdf_text("Documents/NewlyUploaded/Rubric/" + rubricFileNameWithExtension, is_rubric_path=True)
-
-    #     # Read DOCX content
-    #     elif extension == ".docx":
-    #         print("Processing Rubric DOCX file:", rubricFileNameWithExtension)
-    #         docxPath = "Documents/NewlyUploaded/Rubric/" + rubricFileNameWithExtension
-    #         rubricContent = convert_docx_to_pdf(docxPath, is_rubric_path=True)
-
-    #     # Skip unsupported file formats
-    #     else:
-    #         continue
 
         # Validate file content before LLM evaluation
         if not fileContent:
             print(f"[ERROR] File content is empty for {fileNameWithExtension}. Skipping.")
             continue
+
+        # Read the final output file content
+        with open(final_output, "r") as final_file:
+            fileContent = final_file.read()
 
         # Evaluate the document using LLM
         print(f"Calling evaluate_document_with_prompt for {fileNameWithExtension}...")
