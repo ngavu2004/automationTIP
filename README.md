@@ -1,19 +1,19 @@
-# AI Grading
+# AI Evaluator
 
 
-- Our model uses local LLMs to do RAG in Korean Documents.
+- Our model uses local LLMs to evaluate uploaded files.
     1. **app.py**: This script defines the Streamlit interface.
     2. **main.py**: This script defines main function and calling other functions.
     3. **llm_processing.py**: Using langchain, this script interacts with local LLMs.
-    4. **file_processing.py**: Extract data from PDF and docx, converts it to text format.
+    4. **file_processing.py**: Extract data from PDF and DOCX, converts it to text format.
     5. **Helper**: It contains utility functions to use in main.py. 
 
 ### 📚 Requirements
 This system requires a few things before we can start working on it
 1. Ollama to run local machine. In order to use other commercial model, modify the .env_sample to .env and the contents properly to use your own API.
-2. Download llama3 model to experiment.
+2. Download Llama3 model to experiment.
 3. Install requirements.txt
-    - Recommend using conda virtual environment with Python 3.10.14 for this model.
+    - Recommend using conda virtual environment with Python 3.10.0 for this model.
 
 ### 🚀 Getting Started
 To get started with this model, follow these steps:

@@ -25,7 +25,7 @@ def delete_files(path):
 
 def home():
     st.title("Welcome to AI Evaluator")
-    st.subheader("Your go-to application for download canvas submissions and AI-based assessment")
+    st.subheader("Your go-to application for AI-based assessment")
 
     st.markdown("<hr style='border: 1px solid;'>", unsafe_allow_html=True)
 
@@ -34,49 +34,48 @@ def home():
     AI Evaluator is an application that leverages Large Language Models to offer automatic assessment from documents, built by a research team at Arizona State University.
 
     ### Our Services
-    - **Download Submissions:** Download multiple submissions from Canvas.
-    - **Evaluate Submissions:** Upload multiple PDF and docx documents to evaluate.
+    - **Evaluate Submissions:** Upload multiple PDF and DOCX documents to evaluate.
     """)
 
     st.markdown("<hr style='border: 1px solid;'>", unsafe_allow_html=True)
 
 
-def download_submission():
-    st.title("Download Submissions")
-    st.subheader("Download submissions from Canvas")
-    st.markdown("<p style='margin-top: 30px; margin-bottom: 1px;'></p>", unsafe_allow_html=True)
-    textarea_style = """
-        <style>
-            .stTextArea textarea{
-                padding: 15px;
-                padding-left: 20px;
-                height: 120px;
-            }
-        </style>
-    """
-    st.markdown(
-        """
-            <style>
-                .stButton button {
-                    width: 100%;
-                    background-color: #ced4da;
-                    color: #333;
-                }
-            </style>
-        """,
-        unsafe_allow_html=True
-    )
+# def download_submission():
+#     st.title("Download Submissions")
+#     st.subheader("Download submissions from Canvas")
+#     st.markdown("<p style='margin-top: 30px; margin-bottom: 1px;'></p>", unsafe_allow_html=True)
+#     textarea_style = """
+#         <style>
+#             .stTextArea textarea{
+#                 padding: 15px;
+#                 padding-left: 20px;
+#                 height: 120px;
+#             }
+#         </style>
+#     """
+#     st.markdown(
+#         """
+#             <style>
+#                 .stButton button {
+#                     width: 100%;
+#                     background-color: #ced4da;
+#                     color: #333;
+#                 }
+#             </style>
+#         """,
+#         unsafe_allow_html=True
+#     )
 
-    if st.button("Start downloading"):
-        with st.spinner("Downloading submissions from Canvas..."):
-            pass
-        st.success("Download Completed")
+#     if st.button("Start downloading"):
+#         with st.spinner("Downloading submissions from Canvas..."):
+#             pass
+#         st.success("Download Completed")
 
 
 def generate_grade():
     st.title("Evaluate Submissions")
     st.subheader("Generating AI-based assessments")
-    uploaded_file_original = st.file_uploader("Upload a file to evaluate: ", type=["pdf", "docx"], accept_multiple_files=True)
+    uploaded_file_original = st.file_uploader("Upload files to evaluate: ", type=["pdf", "docx"], accept_multiple_files=True)
     # col1, col2 = st.columns(2)
 
     # with col1:
@@ -160,12 +159,13 @@ def main():
         initial_sidebar_state="expanded")
 
     st.sidebar.title("Navigation")
-    page = st.sidebar.selectbox("Choose a page:", ["Home", "Download Submissions", "Evaluate Submissions"])
+    # page = st.sidebar.selectbox("Choose a page:", ["Home", "Download Submissions", "Evaluate Submissions"])
+    page = st.sidebar.selectbox("Choose a page:", ["Home", "Evaluate Submissions"])
 
     if page == "Home":
         home()
-    elif page == "Download Submissions":
-        download_submission()
+    # elif page == "Download Submissions":
+    #     download_submission()
     elif page == "Evaluate Submissions":
         generate_grade()
 
