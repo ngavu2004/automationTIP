@@ -11,8 +11,11 @@ from langchain_community.callbacks import get_openai_callback
 from langchain.chains.question_answering import load_qa_chain
 
 
+# Global variables
 output_dir = "chunk"
 rubric_file = "Prompts/Rubric.yaml" # Change file as you want
+part_titles = ["Project Description / Purpose", "Project Overview", 
+               "Timeline", "Project Scope", "Project Team"]
 
 load_dotenv()
 
@@ -26,78 +29,87 @@ def load_rubric(filename: str):
 
 # Split the text by predefined parts (You can change the titles)
 def split_text_by_parts(text: str, output_dir: str):
-    part_titles = [
-        "Project Description / Purpose",
-        "Project Overview",
-        "Timeline",
-        "Project Scope",
-        "Project Team"
-    ]
 
     # Ensure the output directory exists
     if not os.path.exists(output_dir):
-        os.makedirs(output_dir)  # Create the directory if it does not exist
+        os.makedirs(output_dir)
 
     chunks = {}
     current_part = None
     buffer = []
-    # title_processed = {}
     project_desc_indices = []
 
     # Normalize text (strip leading/trailing spaces and replace newlines)
     normalized_lines = [line.strip() for line in text.splitlines()]
 
+    # Function to match part titles with flexible spaces
     def match_title_with_variations(line, title):
-        # # Create regex pattern to handle multiple spaces or tabs between words
-        # regex_title = r"\s*".join(re.escape(word) for word in title.split())
-        # return re.match(fr"^{regex_title}[:\s\t]*$", line)
-        
-        # Create regex pattern to handle any sequence of spaces or tabs between words
-        regex_title = r"[ \t]*".join(re.escape(word) for word in title.split())
-        return re.match(fr"^{regex_title}[ \t]*[:\s\t]*$", line)
-    
-    # # Normalize the title for consistent file naming and matching
-    # def normalize_title(title, suffix=""):
-    #     if title == "Project Description / Purpose":
-    #         filename = f"{'Process Milestone' if suffix == 'first' else 'Project Description'}"
-    #     else:
-    #         filename = title.replace("/", "_").strip()
-    #     return filename + ".txt"
+        regex_title = r'\s+'.join(re.escape(word) for word in title.split())
+        return re.search(fr"{regex_title}[\s:]*$", line, flags=re.IGNORECASE)
 
-    # Find position for Project Description / Purpose
+    # Find positions for "Project Description / Purpose"
     for i, line in enumerate(normalized_lines):
         if match_title_with_variations(line, "Project Description / Purpose"):
             project_desc_indices.append(i)
 
+    # Case 1: Exactly 2 occurrences
     if len(project_desc_indices) == 2:
         first_start, second_start = project_desc_indices
-        chunks["Process Milestone"] = "\n".join(normalized_lines[first_start + 1: second_start])
-        chunks["Project Description"] = "\n".join(normalized_lines[second_start + 1:])
-    elif len(project_desc_indices) == 1:
-        second_start = project_desc_indices[0]
-        chunks["Process Milestone"] = "\n".join(normalized_lines[:second_start])
-        chunks["Project Description"] = "\n".join(normalized_lines[second_start + 1:])
+        chunks["Process Milestone"] = "\n".join(normalized_lines[first_start + 1: second_start]).strip()
+        chunks["Project Description"] = "\n".join(normalized_lines[second_start + 1:]).strip()
 
-    # for line in text.splitlines():
+    # Case 2: 1 occurrence or none
+    else:
+        # Define the starting point
+        start = project_desc_indices[0] if project_desc_indices else 0
+
+        # Find the next part title after the last occurrence
+        next_title_index = None
+        for i in range(start + 1, len(normalized_lines)):
+            if any(match_title_with_variations(normalized_lines[i], title)
+                   for title in part_titles if title != "Project Description / Purpose"):
+                next_title_index = i
+                break
+
+        # If no next part title, go to the end
+        end_index = next_title_index if next_title_index else len(normalized_lines)
+
+        # Extract content from start to the next part title or end of document
+        content = "\n".join(normalized_lines[start + 1:end_index]).strip()
+
+        # If "Project Description / Purpose" exists, exclude the title line
+        if project_desc_indices:
+            content = "\n".join(normalized_lines[project_desc_indices[0] + 1:end_index]).strip()
+        else:
+            content = "\n".join(normalized_lines[:end_index]).strip()
+
+        # Save identical content for both parts
+        chunks["Process Milestone"] = content
+        chunks["Project Description"] = content
+
+    # General part splitting for other part_titles
     for line in normalized_lines:
         stripped_line = line.strip()
 
-        # Detect part titles (match titles even with varying spaces or tabs)
-        matched_title = next((title for title in part_titles if title != "Project Description / Purpose" and match_title_with_variations(stripped_line, title)), None)
+        # Detect part titles
+        matched_title = next((title for title in part_titles 
+                              if title != "Project Description / Purpose" 
+                              and match_title_with_variations(stripped_line, title)), None)
 
         if matched_title:
             if current_part:
-                chunks[current_part] = "\n".join(buffer)
+                chunks[current_part] = "\n".join(buffer).strip()
             current_part = matched_title
             buffer = []
         elif current_part:
             buffer.append(line)
 
     if current_part:
-        chunks[current_part] = "\n".join(buffer)
+        chunks[current_part] = "\n".join(buffer).strip()
 
+    # Save each part as a separate file
     for part_name, content in chunks.items():
-        with open(os.path.join(output_dir, f"{part_name.replace('/', '_')}.txt"), "w") as f:
+        with open(os.path.join(output_dir, f"{part_name.replace('/', '_')}.txt"), "w", encoding="utf-8") as f:
             f.write(content)
 
     return chunks
@@ -281,6 +293,8 @@ def evaluate_document_with_prompt(text: str):
 
     results = {}
     llm = ChatOllama(model="llama3", temperature=0)
+    print(f"[DEBUG] Running model: {llm.model}")  # For debugging
+
     chain = load_qa_chain(llm=llm)
 
     # for part_name, part_text in parts.items():

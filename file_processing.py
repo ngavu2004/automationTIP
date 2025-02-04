@@ -2,9 +2,7 @@ import re
 import os
 import camelot
 from docx2pdf import convert
-
-# Can be changed according to the input files (List of keywords need to be the header of the chunk)
-line_break_keywords = ["Project Description / Purpose", "Project Overview", "Timeline", "Project Scope", "Project Team", "Signatures"]
+from llm_processing import part_titles
 
 
 # Ensure directories exist
@@ -15,7 +13,7 @@ def check_directory():
         os.makedirs("Documents/AlreadyRead")
     if not os.path.exists("Documents/Results"):
         os.makedirs("Documents/Results")
-    if not os.path.exists("Documents/AlreadyRead/Debug"):  # Debugging the combining of stream and lattice mode
+    if not os.path.exists("Documents/AlreadyRead/Debug"):
         os.makedirs("Documents/AlreadyRead/Debug")
 
 
@@ -49,7 +47,6 @@ def read_pdf_text(pdfPath: str, is_rubric_path=False):
             pdfText = file.read()
 
     return pdfText
-
 
 # Convert docx to pdf and read text from a PDF
 def convert_docx_to_pdf(docxPath: str, is_rubric_path=False):
@@ -89,6 +86,31 @@ def convert_docx_to_pdf(docxPath: str, is_rubric_path=False):
     except Exception as e:
         print(f"[ERROR] An error occurred while converting the file: {e}")
         return None, None  # Return None if an error occurs
+
+
+# Remove tabs and normalize spaces (only for titles defined in part_titles)
+def clean_tabs_and_titles(text):
+    text = text.replace('\t', ' ')
+
+    for title in part_titles:
+        # Remove all spaces within the title
+        compressed_title = re.sub(r'\s+', '', title)
+
+        # Replace occurrences of the compressed title (with spaces in between) with the original title
+        pattern = re.compile(r'(\s*)'.join(list(compressed_title)), re.IGNORECASE)
+        text = pattern.sub(title, text)
+
+    return text
+
+
+def match_title_with_variations(line, title):
+    # Generate a regex pattern to allow optional spaces or special characters between each character
+    regex_title = r'[\s]*'.join(re.escape(char) for char in title if char != " ")
+    
+    # Exception handling: allow spaces, dashes (-), and colons (:) after the title
+    pattern = fr"{regex_title}[\s:–-]*$"
+    
+    return re.search(pattern, line, flags=re.IGNORECASE)
 
 
 # Bullet point handling and line break management
@@ -163,7 +185,8 @@ def extract_data(file_path):
             row_str = "".join(row_cells).rstrip()
 
             # If any keyword from the list appears at the beginning of the row, add a line break
-            if any(row_str.strip().startswith(keyword + ":") or row_str.strip() == keyword for keyword in line_break_keywords):
+            if any(match_title_with_variations(row_str, title) for title in part_titles):
+    
                 formatted_data += "\n\n"
 
             formatted_data += row_str + "\n"
@@ -171,8 +194,9 @@ def extract_data(file_path):
         # Add a blank line between tables for better readability
         formatted_data += "\n\n"
 
-    # Apply bullet point formatting globally
     formatted_data = format_bullet_points(formatted_data)
+    formatted_data = clean_tabs_and_titles(formatted_data)
+
     return formatted_data
 
 
