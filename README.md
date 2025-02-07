@@ -7,6 +7,9 @@
     3. **llm_processing.py**: Using langchain, this script interacts with local LLMs.
     4. **file_processing.py**: Extract data from PDF and DOCX, converts it to text format.
     5. **Helper**: It contains utility functions to use in main.py. 
+    6. **Prompts**: This folder contains prompts for grading the submissions
+    7. **VisualizeResult**: This folder contains notebooks to visualize and evaluate the accuracy of the results
+    8. **ExperimentNotebooks**: This folder contains notebooks used for experimenting new functions
 
 ### 📚 Requirements
 This system requires a few things before we can start working on it
